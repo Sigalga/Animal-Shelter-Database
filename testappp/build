@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sudo g++ -Wall -I/usr/include/cppconn -o testapp tester.cpp -L/usr/lib -lmysqlcppconn

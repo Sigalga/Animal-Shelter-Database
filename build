@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sudo g++ -g -Wall -I/usr/include/cppconn -o ashs animal_shelter.cpp -L/usr/lib -lmysqlcppconn
