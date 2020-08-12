@@ -1,3 +1,0 @@
-#!/bin/bash
-
-g++ -g -Wall -o test stmt_string_generator_test.cpp

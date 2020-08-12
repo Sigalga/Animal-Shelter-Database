@@ -1,0 +1,9 @@
+# ignore files:
+*.d
+*.o
+*.obj
+*.out
+build.sh
+
+#ignore directories:
+.vscode/
