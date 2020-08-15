@@ -16,18 +16,34 @@ namespace ashs
 class PetBook
 {
 public:
-    PetBook() : con(NULL), stringGen(NULL) {}
+    using Key = StmtStringGenerator::Key;
+    using StringFunc = StmtStringGenerator::StringFunc;
+
     PetBook(Connection* con, StmtStringGenerator* stringGen);
+    void SetDatabase(const string& db) { petBookDB = db; }
 
     void Start();
 
 private:
     Connection* con;
     StmtStringGenerator* stringGen;
+    string petBookDB;
 
+    // Displays welcome menu for the interactive ui
     void DisplayMenu();
+
+    // Receives and handles input from user
     void ExecuteRequests();
+
+    // Prints a database resultset for a query
     void DisplayResults();
+
+    // Displays a list of all operations possible via ui
+    void DisplayStringFuncs();
+
+    // Receives user input and produces an SQL statement string
+    string& MakeString();
+    
 };
 
 } // namespace ashs

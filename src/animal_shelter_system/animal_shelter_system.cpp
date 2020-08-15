@@ -1,4 +1,5 @@
 #include "animal_shelter_system.hpp"
+#include "pet_book_string_funcs.hpp"
 
 using namespace sql;
 using namespace std;
@@ -13,7 +14,7 @@ static const string userDef("root");
 AnimalShelterSystem::AnimalShelterSystem()
     :   driver(sql::mysql::get_mysql_driver_instance()),
         con(SetConnection()),
-        pbStringGen(new StmtStringGenerator),
+        pbStringGen(InitPBStringGen()),
         petBook(con, pbStringGen)
 {
     Init();
@@ -27,12 +28,26 @@ Connection* AnimalShelterSystem::SetConnection()
     return driver->connect(urlDef, userDef, pass);
 }
 
-Connection* AnimalShelterSystem::SetConnection(const string password)
+Connection* AnimalShelterSystem::SetConnection(const string& password)
 {
     return driver->connect(urlDef, userDef, password);
 }
 
+StmtStringGenerator* AnimalShelterSystem::InitPBStringGen()
+{
+    StmtStringGenerator* stringGen = new StmtStringGenerator;
+
+    // TO DO : add here all the string functions to be used by pb.
+    stringGen->AddStringFunc("find by", &FindBy);
+    return stringGen;
+}
+
 void AnimalShelterSystem::Init()
+{
+    Start();
+}
+
+void AnimalShelterSystem::Start()
 {
     DisplayMenu();
 

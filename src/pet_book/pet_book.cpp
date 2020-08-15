@@ -3,6 +3,7 @@
 #include <string>
 #include <stdexcept>
 #include <stdlib.h>
+#include <vector>
 
 // MySQL/C++ Connector includes
 #include <cppconn/resultset.h>		    // sql::ResultSet
@@ -17,10 +18,9 @@ using namespace std;
 namespace ashs
 {
     
-static const string petBookDB = "pet_book";
 
 PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
-    : con(con), stringGen(stringGen)
+    : con(con), stringGen(stringGen), petBookDB("pet_book")
 {
 	con->setSchema(petBookDB);
 }
@@ -82,6 +82,51 @@ void PetBook::DisplayResults()
 
     // delete res;
 	// delete pstmt;
+}
+
+
+// void PetBook::AddNamedStrFunc(string& name, StringFunc func)
+// {
+//     namedStrFuncs.push_back(pair<string, StringFunc>(name, func));
+// }
+
+// void PetBook::InitStringGen()
+// {
+//     // add all functions to stringGen
+//     // for i in namedStrFuncs
+//     //  stringGen->AddStringFunc(idx, i->second);
+// }
+
+void PetBook::DisplayStringFuncs()
+{
+    // // get all keys from the string generator and print them
+    // // TO DO : make vec a member to improve efficiency
+    // vector<Key>* vec = stringGen->GetKeys();
+    // for (vector<Key>::iterator it = vec->begin();
+    //     it != vec->end();
+    //     ++it)
+    // {
+    //     cout << *it << "\n" << endl;
+    // }
+
+    // delete vec;
+}
+
+string& PetBook::MakeString()
+{
+    string key, col, val;
+
+    // choose operation
+    cout << "Select an operation by typing it" << endl;
+    cin >> key;
+    // enter column
+    cout << "Enter the parameter" << endl;
+    cin >> col;
+    // enter value
+    cout << "Enter a value for the parameter" << endl;
+    cin >> val;
+
+    return stringGen->GenerateString(key, col, val);
 }
 
 } // namespace ashs

@@ -2,7 +2,6 @@
 #define ASHS_ANIMAL_SHELTER_SYSTEM_HPP
 
 // Standard C++ includes
-#include <iostream>
 #include <string>
 
 // MySQL/C++ Connector includes
@@ -28,18 +27,20 @@ public:
 private:
     mysql::MySQL_Driver* driver;
     Connection* con;
+
     StmtStringGenerator* pbStringGen;
     PetBook petBook;
 
     Connection* SetConnection();
-    Connection* SetConnection(const string password);
+    Connection* SetConnection(const string& password);
 
     void Init();
+    void Start();
     void DisplayMenu();
+
+    StmtStringGenerator* InitPBStringGen();
 };
 
 } // namespace ashs
 
 #endif // ASHS_ANIMAL_SHELTER_SYSTEM_HPP
-
-
