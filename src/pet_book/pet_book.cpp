@@ -3,10 +3,9 @@
 #include <string>
 #include <stdexcept>
 #include <stdlib.h>
-#include <vector>
+#include <vector>  
 
 // MySQL/C++ Connector includes
-#include <cppconn/resultset.h>		    // sql::ResultSet
 #include <cppconn/prepared_statement.h>	// sql::PreparedStatement
 #include <cppconn/exception.h>          // sql::SQLException
 
@@ -17,52 +16,111 @@ using namespace std;
 
 namespace ashs
 {
-    
+
+const string g_welcome("\nWelcome to the PetBook");
 
 PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
-    : con(con), stringGen(stringGen), petBookDB("pet_book")
+    :   con(con),
+        stringGen(stringGen),
+        petBookDB("pet_book"),
+        operationNames(stringGen->GetKeys()),
+        isRunning(false),
+        currId("0")
 {
 	con->setSchema(petBookDB);
 }
 
+PetBook::~PetBook()
+{
+    delete operationNames;
+}
+
 void PetBook::Start()
 {
-    DisplayMenu();
-    ExecuteRequests();
+    operationNames = stringGen->GetKeys();
+    isRunning = true;
+    
+    cout << g_welcome << endl;
+    ExecuteInput();
 }
 
-void PetBook::DisplayMenu()
-{
-    cout << "\nWelcome to the PetBook\n"
-    << "To go back to the main menu, press q\n"
-    << "Enter a query: "
-    << endl;
-}
-
-void PetBook::ExecuteRequests()
+void PetBook::ExecuteInput()
 {
     string query;
     PreparedStatement* pstmt;
     
-    getline(cin, query);
-    while (0 != query.compare("q"))
+    query = MakeString();
+    while (isRunning)
     {
         try
         {
             pstmt = con->prepareStatement(query);
-            pstmt->executeQuery();
-            DisplayResults();
-            getline(cin, query);
+            DisplayResults(pstmt->executeQuery());    
         }
         catch (sql::SQLException &e)
         {
             cout << "# ERR: " << e.what() << endl;
-            getline(cin, query);
         }
+
+        query = MakeString();
     }
 }
 
-void PetBook::DisplayResults()
+// String Makers ///////////////////////////////////////////////////////////
+string& PetBook::MakeString()
+{
+    string key, col="", val="", val2="", id="";
+
+    // choose operation
+    DisplayOperMenu();
+    cin >> key;
+
+    if (0 == key.compare("find"))
+    {
+        currId = "0";
+
+        // enter column
+        DisplayFieldMenu();
+        cin >> col;
+
+        // enter value
+        cout << "Enter a value for the parameter" << endl;
+        cin >> val;
+    }
+    else if (0 == key.compare("update"))
+    {
+        cout << "choose an entry and enter its pet_id" << endl;
+        cin >> val2;
+        currId = val2;
+
+        // enter column
+        DisplayFieldMenu();
+        cin >> col;
+
+        // enter value
+        cout << "Enter a value for the parameter" << endl;
+        cin >> val;
+    }
+
+    return stringGen->GenerateString(key, col, val, val2);
+}
+
+// Result Displayers ///////////////////////////////////////////////////////
+void PetBook::DisplayResults(ResultSet* res)
+{   
+    ResultSet* fields = GetFields();
+
+    while (res->next())
+    {
+        for (fields->beforeFirst(); fields->next(); )
+        {
+            cout << res->getString(fields->getString("COLUMN_NAME")) << "\t";
+        }
+        cout << endl;
+    }
+}
+
+void PetBook::DisplayAll()
 {
     PreparedStatement* pstmt;
     ResultSet* res;
@@ -70,63 +128,46 @@ void PetBook::DisplayResults()
     pstmt = con->prepareStatement("SELECT * FROM pets ORDER BY pet_id ASC");
     res = pstmt->executeQuery();
 
-    while (res->next())
-    {
-        cout
-        << res->getInt("pet_id")        << "\t"
-        << res->getString("adopter_id") << "\t"
-        << res->getString("name")       << "\t"
-        << res->getString("age_months") << "\t"
-        << res->getString("status")     << endl;
-    }
-
-    // delete res;
-	// delete pstmt;
+    DisplayResults(res);
 }
 
+// Menu Displayers /////////////////////////////////////////////////////////
+void PetBook::DisplayOperMenu()
+{
+    cout << "Select an operation by typing it.\n"
+    << "Available operations are:" << endl;
 
-// void PetBook::AddNamedStrFunc(string& name, StringFunc func)
-// {
-//     namedStrFuncs.push_back(pair<string, StringFunc>(name, func));
-// }
-
-// void PetBook::InitStringGen()
-// {
-//     // add all functions to stringGen
-//     // for i in namedStrFuncs
-//     //  stringGen->AddStringFunc(idx, i->second);
-// }
+    DisplayStringFuncs();
+}
 
 void PetBook::DisplayStringFuncs()
 {
-    // // get all keys from the string generator and print them
-    // // TO DO : make vec a member to improve efficiency
-    // vector<Key>* vec = stringGen->GetKeys();
-    // for (vector<Key>::iterator it = vec->begin();
-    //     it != vec->end();
-    //     ++it)
-    // {
-    //     cout << *it << "\n" << endl;
-    // }
-
-    // delete vec;
+    // get all keys from the string generator and print them
+    for (vector<Key>::iterator it = operationNames->begin();
+        it != operationNames->end();
+        ++it)
+    {
+        cout << "- " << *it << endl;
+    }
 }
 
-string& PetBook::MakeString()
+void PetBook::DisplayFieldMenu()
 {
-    string key, col, val;
+    cout << "Enter the parameter to search by or modify. options are:" << endl;
 
-    // choose operation
-    cout << "Select an operation by typing it" << endl;
-    cin >> key;
-    // enter column
-    cout << "Enter the parameter" << endl;
-    cin >> col;
-    // enter value
-    cout << "Enter a value for the parameter" << endl;
-    cin >> val;
+    ResultSet* res = GetFields();
+    while (res->next())
+    {
+        cout << "- " << res->getString("COLUMN_NAME") << endl;
+    }
+}
 
-    return stringGen->GenerateString(key, col, val);
+ResultSet* PetBook::GetFields()
+{
+    PreparedStatement* pstmt = con->prepareStatement(
+        "select COLUMN_NAME from information_schema.COLUMNS where TABLE_NAME='pets'");
+
+    return pstmt->executeQuery();
 }
 
 } // namespace ashs

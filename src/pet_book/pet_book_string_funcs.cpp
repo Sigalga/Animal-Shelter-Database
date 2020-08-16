@@ -8,19 +8,24 @@ namespace ashs
 
 static bool isNum(const string& val);
 
-static const string findBy("SELECT * FROM pets WHERE ");
+static const string g_findBy("SELECT * FROM pets WHERE ");
+static const string g_pk("pet_id");
 
 // Queries ///////////////////////////////////////////////////////
 
-string& FindBy(const string& col, const string& val)
+string& FindBy(const string& col, const string& val, const string& val2)
 {
-    string* str = new string(findBy);
+    string* str = new string(g_findBy);
 
-    // check if the value is a number
     if (isNum(val))
     {
         // find by number
         *str += (col + "=" + val);
+    }
+    else if ("" != val2)
+    {
+        // find by range
+        *str += (col + " BETWEEN " + val + " AND " + val2);
     }
     else
     {
@@ -31,13 +36,7 @@ string& FindBy(const string& col, const string& val)
     return *str;
 }
 
-static bool isNum(const string& val)
-{
-    char* isText;
-    strtol(val.c_str(), &isText, 10);
 
-    return false == *isText;
-}
 
 // string& OrderBy(const string& col, const string& order)
 // {
@@ -52,16 +51,28 @@ static bool isNum(const string& val)
 //     // "INSERT INTO pets VALUES (val1, val2, val3)"
 // }
 
-// string& UpdateField(const string& col, const string& val)
-// {
-//     // example:
-//     // "UPDATE pets SET col=val WHERE pk=id"
-// }
+string& UpdateField(const string& col, const string& val, const string& id)
+{
+    string* str = new string("UPDATE pets SET ");
+    *str += (col + "='" + val + "' WHERE " + g_pk + "=" + id + ";");
+
+    return *str;
+}
 
 // string& RemoveEntry(const string& null, const string& id)
 // {
 //     // example:
 //     // "DELETE FROM pets WHERE pk=id"
 // }
+
+// Helper functions //////////////////////////////////////////
+
+static bool isNum(const string& val)
+{
+    char* isText;
+    strtol(val.c_str(), &isText, 10);
+
+    return false == *isText;
+}
 
 } // namespace ashs

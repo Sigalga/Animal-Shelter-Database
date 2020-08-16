@@ -6,7 +6,11 @@
 #include "mysql_driver.h"			// sql::mysql::MySQL_Driver
 #include <cppconn/connection.h>     // sql::Connection
 
+#include <boost/bind.hpp>			// boost::bind
+#include <boost/function.hpp>		// boost::function
+
 #include "pet_book.hpp"
+#include "pet_book_string_funcs.hpp"
 
 using namespace sql;
 using namespace std;
@@ -72,6 +76,10 @@ static void StartTest()
 {
 	StmtStringGenerator strGen;
     PetBook petBook(g_con, &strGen);
+
+	strGen.AddStringFunc("exit", boost::bind(&PetBook::Exit, &petBook, _1, _2, _3));
+	strGen.AddStringFunc("find", &FindBy);
+	strGen.AddStringFunc("update", &UpdateField);
 
     petBook.Start();
 }

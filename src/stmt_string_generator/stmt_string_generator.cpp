@@ -45,11 +45,11 @@ vector<StmtStringGenerator::Key>* StmtStringGenerator::GetKeys()
     return vec;
 }
 
-string& StmtStringGenerator::GenerateString(const Key key, const string& col, const string& val)
+string& StmtStringGenerator::GenerateString(const Key key, const string& col, const string& val1, const string& val2)
 {
     try
     {
-        return stringFuncs.at(key)(col, val);
+        return stringFuncs.at(key)(col, val1, val2);
     }
     catch(const std::out_of_range& e)
     {

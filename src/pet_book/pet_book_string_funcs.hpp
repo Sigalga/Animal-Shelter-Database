@@ -10,16 +10,15 @@ namespace ashs
 {
 
 // queries
-string& FindBy(const string&, const string&);
-
+string& FindBy(const string& col, const string& val, const string& val2="");
 
 // TODO:
 
 // string& OrderBy(const string&, const string&);
 
 // edit operations
+string& UpdateField(const string& col, const string& val, const string& id);
 // string& AddEntry(const string&, const string&);
-// string& UpdateField(const string&, const string&);
 // string& RemoveEntry(const string&, const string&);
 
 } // namespace ashs
