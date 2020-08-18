@@ -11,34 +11,53 @@ static bool isNum(const string& val);
 static const string g_findBy("SELECT * FROM pets WHERE ");
 static const string g_pk("pet_id");
 
+static string& GetRule(const string& col, const string& val, const string& val2);
+
 // Queries ///////////////////////////////////////////////////////
+
+// string& FindBy(const string& col, const string& val, const string& val2)
+// {
+//     string* str = new string(g_findBy);
+
+//     if (isNum(val))
+//     {
+//         if ("" == val2)
+//         {
+//             // find by number
+//             *str += (col + "=" + val);
+//         }
+//         else
+//         {
+//             // find by range
+//             *str += (col + " BETWEEN " + val + " AND " + val2);
+//         }
+//     }
+//     else
+//     {
+//         // find by text
+//         *str += (col + " LIKE '%" + val + "%'");
+//     }
+    
+//     return *str;
+// }
 
 string& FindBy(const string& col, const string& val, const string& val2)
 {
-    string* str = new string(g_findBy);
-
-    if (isNum(val))
-    {
-        // find by number
-        *str += (col + "=" + val);
-    }
-    else if ("" != val2)
-    {
-        // find by range
-        *str += (col + " BETWEEN " + val + " AND " + val2);
-    }
-    else
-    {
-        // find by text
-        *str += (col + " LIKE '%" + val + "%'");
-    }
-    
+    string* str = new string(g_findBy + GetRule(col, val, val2));
     return *str;
 }
 
+string& FilterBy(const string& col, const string& val, const string& query)
+{
+    string* str = new string(query);
 
+    // add rule
+    *str += " AND " + GetRule(col, val, "");
 
-// string& OrderBy(const string& col, const string& order)
+    return *str;
+}
+
+// string& OrderBy(const string& col, onst string& order)
 // {
 
 // }
@@ -66,6 +85,32 @@ string& UpdateField(const string& col, const string& val, const string& id)
 // }
 
 // Helper functions //////////////////////////////////////////
+
+static string& GetRule(const string& col, const string& val, const string& val2)
+{
+    string* rule = new string;
+    
+    if (isNum(val))
+    {
+        if ("" == val2)
+        {
+            // find by number
+            *rule = (col + "=" + val);
+        }
+        else
+        {
+            // find by range
+            *rule = (col + " BETWEEN " + val + " AND " + val2);
+        }
+    }
+    else
+    {
+        // find by text
+        *rule = (col + " LIKE '%" + val + "%'");
+    }
+
+    return *rule;
+}
 
 static bool isNum(const string& val)
 {

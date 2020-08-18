@@ -37,8 +37,6 @@ private:
     void Init();
     void Start();
     void DisplayMenu();
-
-    StmtStringGenerator* InitPBStringGen();
 };
 
 } // namespace ashs

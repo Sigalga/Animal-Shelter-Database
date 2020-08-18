@@ -13,7 +13,7 @@ namespace ashs
 string& FindBy(const string& col, const string& val, const string& val2="");
 
 // TODO:
-
+string& FilterBy(const string& col, const string& val, const string& query);
 // string& OrderBy(const string&, const string&);
 
 // edit operations

@@ -10,10 +10,10 @@ void StmtStringGenerator::AddStringFunc(const Key key, StringFunc func)
     stringFuncs.insert(pair<Key, StringFunc>(key, func));
 }
 
-void StmtStringGenerator::AddStringFunc(const string& str, StringFunc func)
-{
-    stringFuncs.insert(pair<Key, StringFunc>(const_cast<string&>(str), func));
-}
+// void StmtStringGenerator::AddStringFunc(const string& str, StringFunc func)
+// {
+//     stringFuncs.insert(pair<Key, StringFunc>(const_cast<string&>(str), func));
+// }
 
 void StmtStringGenerator::AddStringFunc(const char* cStr, StringFunc func)
 {

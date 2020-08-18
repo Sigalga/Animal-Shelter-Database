@@ -31,23 +31,20 @@ public:
     void Start();
     void Stop() { isRunning = false; }
 
-    // StringFuncs
-    string& Exit(const string& a="", const string& b="", const string& c="")
-    {
-        isRunning = false;
-        return const_cast<string&>(a);
-    }
-
 private:
     Connection* con;
     StmtStringGenerator* stringGen;
     string petBookDB;
-    vector<Key>* operationNames;
     bool isRunning;
     string currId;
+    string currQuery;
 
-    // Displays welcome menu for the interactive uiatic 
+    void InitStringGen();
+
+    // Displays a list of all operations possible via ui
     void DisplayOperMenu();
+
+    // Displays a list of all table fields
     void DisplayFieldMenu();
 
     // Receives and handles input from user
@@ -59,13 +56,18 @@ private:
     // Prints the entire pets table ordered by ascending pet id
     void DisplayAll();
 
-    // Displays a list of all operations possible via ui
-    void DisplayStringFuncs();
 
     ResultSet* GetFields();
 
     // Receives user input and produces an SQL statement string
     string& MakeString();
+
+        // StringFuncs
+    string& Exit(const string& a="", const string& b="", const string& c="")
+    {
+        isRunning = false;
+        return const_cast<string&>(a);
+    }
 };
 
 

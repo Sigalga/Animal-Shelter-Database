@@ -22,7 +22,7 @@ public:
     typedef map<Key, StringFunc> FuncMap;
 
     void AddStringFunc(const Key key, StringFunc func);
-    void AddStringFunc(const string& str, StringFunc func);
+    // void AddStringFunc(const string& str, StringFunc func);
     void AddStringFunc(const char* cStr, StringFunc func);
 
     void RemoveStringFunc(const Key key);
