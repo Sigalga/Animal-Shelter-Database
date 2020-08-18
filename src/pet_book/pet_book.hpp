@@ -24,12 +24,20 @@ public:
     using StringFunc = StmtStringGenerator::StringFunc;
 
     PetBook(Connection* con, StmtStringGenerator* stringGen);
-    ~PetBook();
+    ~PetBook() {}
 
     void SetDatabase(const string& db) { petBookDB = db; }
 
     void Start();
     void Stop() { isRunning = false; }
+
+    // StringFuncs
+    string& Exit();
+    string& FindBy();
+    string& FilterBy();
+    string& UpdateField();
+    string& FindByCurrId();
+    string& GetAll();
 
 private:
     Connection* con;
@@ -39,35 +47,29 @@ private:
     string currId;
     string currQuery;
 
+    // General flow functions //////////////////////////////////////////////////
+    // Adds all the StringFuncs to the String Generator
     void InitStringGen();
 
+    // Receives and handles input from user
+    void ExecuteInput();
+
+    // Receives user input and produces an SQL statement string
+    string& MakeString();
+
+    // Menu Displayers /////////////////////////////////////////////////////////
     // Displays a list of all operations possible via ui
     void DisplayOperMenu();
 
     // Displays a list of all table fields
     void DisplayFieldMenu();
 
-    // Receives and handles input from user
-    void ExecuteInput();
-
-    // Prints a database resultset for a query
-    void DisplayResults(ResultSet* res);
-
-    // Prints the entire pets table ordered by ascending pet id
-    void DisplayAll();
-
-
+    // Gets the names of table's fields
     ResultSet* GetFields();
 
-    // Receives user input and produces an SQL statement string
-    string& MakeString();
-
-        // StringFuncs
-    string& Exit(const string& a="", const string& b="", const string& c="")
-    {
-        isRunning = false;
-        return const_cast<string&>(a);
-    }
+    // Result Displayers ///////////////////////////////////////////////////////
+    // Prints a database resultset for a query
+    void DisplayResults(ResultSet* res);
 };
 
 

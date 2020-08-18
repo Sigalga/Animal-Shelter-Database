@@ -14,7 +14,7 @@
 #include <boost/function.hpp>		// boost::function
 
 #include "pet_book.hpp"
-#include "pet_book_string_funcs.hpp"
+// #include "pet_book_string_funcs.hpp"
 
 using namespace sql;
 using namespace std;
@@ -22,22 +22,20 @@ using namespace std;
 namespace ashs
 {
 
+static const string g_findBy("SELECT * FROM pets WHERE ");
+static const string g_pk("pet_id");
+static bool isNum(const string& val);
+static string& GetRule(const string& col, const string& val, const string& val2);
+
 static const string g_welcome("\nWelcome to the PetBook");
-static const size_t g_nOpers = 4;
+static const size_t g_nOpers = 5;
 static const PetBook::Key g_operNames[g_nOpers] =
 {
     "exit",
     "find",
+    "filter",
     "update",
-    "filter"
-};
-
-static const PetBook::StringFunc g_StringFuncs[g_nOpers] =
-{
-    NULL,
-    &FindBy,
-    &UpdateField,
-    &FilterBy
+    "show_all"
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -48,7 +46,7 @@ PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
         petBookDB("pet_book"),
         isRunning(false),
         currId(""),
-        currQuery("")
+        currQuery("")   
 {
 	con->setSchema(petBookDB);
     InitStringGen();
@@ -56,14 +54,12 @@ PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
 
 void PetBook::InitStringGen()
 {
-    // Add the exit operation
-    stringGen->AddStringFunc(g_operNames[0], boost::bind(&PetBook::Exit, this, _1, _2, _3));
-
-    // Add all other operations
-    for (size_t i = 1; i < g_nOpers; i++)
-    {
-        stringGen->AddStringFunc(g_operNames[i], g_StringFuncs[i]);
-    }
+    // Add operations
+    stringGen->AddStringFunc(g_operNames[0], boost::bind(&PetBook::Exit, this));
+    stringGen->AddStringFunc(g_operNames[1], boost::bind(&PetBook::FindBy, this));
+    stringGen->AddStringFunc(g_operNames[2], boost::bind(&PetBook::FilterBy, this));
+    stringGen->AddStringFunc(g_operNames[3], boost::bind(&PetBook::UpdateField, this));
+    stringGen->AddStringFunc(g_operNames[4], boost::bind(&PetBook::GetAll, this));
 }
 
 void PetBook::Start()
@@ -74,7 +70,6 @@ void PetBook::Start()
     ExecuteInput();
 }
 
-// Input loop
 void PetBook::ExecuteInput()
 {
     PreparedStatement* pstmt;
@@ -96,63 +91,14 @@ void PetBook::ExecuteInput()
     }
 }
 
-// String Makers ///////////////////////////////////////////////////////////
 string& PetBook::MakeString()
 {
-    string key, col="", val="", val2="", id="";
-
     // choose operation
     DisplayOperMenu();
+    string key;
     cin >> key;
 
-    if (0 == key.compare("find"))
-    {
-        currId = "query";
-
-        // enter column
-        DisplayFieldMenu();
-        cin >> col;
-
-        // enter value/s
-        cout << "Enter a value for the parameter.\n"
-        << "To enter a number range, type the numbers like so:\n"
-        << "-r <min> <max>"
-        << endl;
-        cin >> val;
-        if (0 == val.compare("-r"))
-        {
-            cin >> val;
-            cin >> val2;
-        }
-    }
-    else if (0 == key.compare("update"))
-    {
-        cout << "choose an entry and enter its pet_id" << endl;
-        cin >> val2;
-        currId = val2;
-
-        // enter column
-        DisplayFieldMenu();
-        cin >> col;
-
-        // enter value
-        cout << "Enter a value for the parameter" << endl;
-        cin >> val;
-    }
-    else if (0 == key.compare("filter"))
-    {
-        val2 = currQuery;
-
-        // enter column
-        DisplayFieldMenu();
-        cin >> col;
-
-        // enter value/s
-        cout << "Enter a value for the parameter" << endl;
-        cin >> val;
-    }
-
-    return stringGen->GenerateString(key, col, val, val2);
+    return stringGen->GenerateString(key);
 }
 
 // Result Displayers ///////////////////////////////////////////////////////
@@ -165,8 +111,9 @@ void PetBook::DisplayResults(ResultSet* res)
         try
         {
             PreparedStatement* pstmt;
-            pstmt = con->prepareStatement(FindBy("pet_id", currId));
-            res = pstmt->executeQuery();    
+            pstmt = con->prepareStatement(FindByCurrId());
+            res = pstmt->executeQuery();
+            currId = "query";
         }
         catch (sql::SQLException &e)
         {
@@ -182,17 +129,6 @@ void PetBook::DisplayResults(ResultSet* res)
         }
         cout << endl;
     }
-}
-
-void PetBook::DisplayAll()
-{
-    PreparedStatement* pstmt;
-    ResultSet* res;
-    
-    pstmt = con->prepareStatement("SELECT * FROM pets ORDER BY pet_id ASC");
-    res = pstmt->executeQuery();
- 
-    DisplayResults(res);
 }
 
 // Menu Displayers /////////////////////////////////////////////////////////
@@ -226,8 +162,126 @@ ResultSet* PetBook::GetFields()
     return pstmt->executeQuery();
 }
 
-PetBook::~PetBook()
+// StringFuncs /////////////////////////////////////////////////////////////
+string& PetBook::Exit()
 {
+    isRunning = false;
+    return *(new string(""));
+}
+
+string& PetBook::FindBy()
+{
+    currId = "query";
+
+    // enter column to search by
+    DisplayFieldMenu();
+    string col("");
+    cin >> col;
+
+    // enter value/s to search by
+    cout << "Enter a value for the parameter.\n"
+    << "To enter a number range, type the numbers like so:\n"
+    << "-r <min> <max>"
+    << endl;
+    string val(""), val2("");
+    cin >> val;
+    if (0 == val.compare("-r"))
+    {
+        cin >> val;
+        cin >> val2;
+    }
+
+    string* str = new string(g_findBy + GetRule(col, val, val2));
+    return *str;
+}
+
+string& PetBook::FilterBy()
+{
+    // enter column to filter by
+    DisplayFieldMenu();
+    string col("");
+    cin >> col;
+
+    // enter value/s to filter by
+    string val(""); //val2(""); // TO DO
+    cout << "Enter a value for the parameter" << endl;
+    cin >> val;
+
+    string* str = new string(currQuery);
+
+    // add rule
+    *str += " AND " + GetRule(col, val, "");
+
+    return *str;
+}
+
+string& PetBook::UpdateField()
+{
+    // choose a single entry
+    cout << "choose an entry and enter its pet_id" << endl;
+    cin >> currId;
+
+    // enter column to update
+    DisplayFieldMenu();
+    string col("");
+    cin >> col;
+
+    // enter new value
+    cout << "Enter a new value for the parameter" << endl;
+    string val("");
+    cin >> val;
+    
+    string* str = new string("UPDATE pets SET ");
+    *str += (col + "='" + val + "' WHERE " + g_pk + "=" + currId + ";");
+
+    return *str;
+}
+
+string& PetBook::FindByCurrId()
+{
+    string* str = new string(g_findBy + GetRule(g_pk, currId, ""));
+    return *str;
+}
+
+string& PetBook::GetAll()
+{
+    string* str = new string("SELECT * FROM pets ORDER BY " + g_pk + " ASC");
+    return *str;
+}
+
+// Helper functions ////////////////////////////////////////////////////////
+static string& GetRule(const string& col, const string& val, const string& val2)
+{
+    string* rule = new string;
+    
+    if (isNum(val))
+    {
+        if ("" == val2)
+        {
+            // find by number
+            *rule = (col + "=" + val);
+        }
+        else
+        {
+            // find by range
+            *rule = (col + " BETWEEN " + val + " AND " + val2);
+        }
+    }
+    else
+    {
+        // find by text
+        *rule = (col + " LIKE '%" + val + "%'");
+    }
+
+    return *rule;
+}
+
+static bool isNum(const string& val)
+{
+    char* isText;
+    strtol(val.c_str(), &isText, 10);
+
+    return false == *isText;
 }
 
 } // namespace ashs
