@@ -33,37 +33,36 @@ public:
 
     // StringFuncs ///////////////////
     string& Exit();
-    // set currId and currQuery to ""
-    string& ClearSearch(); // TO DO
+
+    // forget all initial/concatenated queries
+    string& ClearSearch();
 
     // initial queries
-    // called when currId == ""
-    // set currId to "query"
     string& FindBy();
-    string& GetAll(); // TO DO: can't be secondarily ordered/filtered-by
+    string& GetAll();
 
     // secondary queries
-    // called when currId == "query"
     // may be concatenated to initial/secondary queries
-    string& FilterBy(); // TO DO: add a range input option
+    string& FilterBy();
     string& OrderBy();
 
-    // editorial
-    // final - clear the search when done
+    // editorial operations
+    // clear the search when done, modified item is displayed
     string& UpdateField();
-    string& AddEntry(); // TO DO
+    string& AddEntry();
     string& RemoveEntry(); // TO DO
 
     // hidden (for now)
     string& FindByCurrId();
+    string& FindByMaxId();
 
 private:
     Connection* con;
     StmtStringGenerator* stringGen;
     string petBookDB;
     bool isRunning;
-    string currId;  // for update operations, otherwise "query"
-    string currQuery;   // for secondary operations
+    string currId;      // for update operations, otherwise "query" or empty
+    string currQuery;   // for secondary operations concatenation
 
     // General flow functions //////////////////////////////////////////////////
     // Adds all the StringFuncs to the String Generator
@@ -88,6 +87,13 @@ private:
     // Result Displayers ///////////////////////////////////////////////////////
     // Prints a database resultset for a query
     void DisplayResults(ResultSet* res);
+
+    // Gets the Resultset for a recently edited/added entry
+    ResultSet* GetEditResult();
+
+    // Prints a Resultset in a table view by <fields>
+    void PrintTable(ResultSet* res, ResultSet* fields);
+
 };
 
 

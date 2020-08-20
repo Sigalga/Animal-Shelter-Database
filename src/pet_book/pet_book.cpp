@@ -22,8 +22,9 @@ namespace ashs
 {
 
 // helper funcs
-static bool isNum(const string& val);
 static string& GetRule(const string& col, const string& val, const string& val2);
+static bool isNum(const string& val);
+static void GetSearchVals(string& val, string& val2);
 
 // statement strings
 static const string g_petBookDB("pet_book");
@@ -35,38 +36,44 @@ static const string g_getAllAsc(g_getAll + " ORDER BY " + g_pk + " ASC");
 // other consts
 static const string g_welcome("\nWelcome to the PetBook");
 
-static const size_t g_nOpers = 7;
+// names of all the ui operations
+static const size_t g_nOpers = 8;
 static const PetBook::Key g_operNames[g_nOpers] =
 {
-    "exit",         // initial  secondary
-    "show_all",     // initial
-    "find",         // initial
-    "update",       // initial  secondary
-    "filter",       //          secondary
-    "order",        //          secondary
-    "new_search"    //          secondary
+    "exit",         // 0 initial  secondary
+    "show_all",     // 1 initial
+    "find",         // 2 initial
+    "update",       // 3 initial  secondary
+    "add_new",      // 4 initial  secondary
+    "filter",       // 5          secondary
+    "order",        // 6          secondary
+    "clear"         // 7          secondary
 };
 
-static const size_t g_nInitOpers = 4;
+// names of ui operations to appear in a new search
+static const size_t g_nInitOpers = 5;
 static const PetBook::Key g_initOperNames[g_nInitOpers] =
 {
-    "exit",         // initial  secondary
-    "show_all",     // initial
-    "find",         // initial
-    "update",       // initial  secondary
+    g_operNames[0],
+    g_operNames[1],
+    g_operNames[2],
+    g_operNames[3],
+    g_operNames[4]
 };
 
-static const size_t g_nSecOpers = 5;
+// names of ui operations to appear after an initial/secondary query
+static const size_t g_nSecOpers = 6;
 static const PetBook::Key g_secOperNames[g_nSecOpers] =
 {
-    "exit",         // initial  secondary
-    "update",       // initial  secondary
-    "filter",       //          secondary
-    "order",        //          secondary
-    "new_search"    //          secondary
+    g_operNames[0],
+    g_operNames[3],
+    g_operNames[4],
+    g_operNames[5],
+    g_operNames[6],
+    g_operNames[7]
 };
 
-////////////////////////////////////s////////////////////////////////
+/////////////////////////////////////////////////////////////////////
 
 PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
     :   con(con),
@@ -88,6 +95,7 @@ void PetBook::InitStringGen()
         boost::bind(&PetBook::GetAll, this),
         boost::bind(&PetBook::FindBy, this),
         boost::bind(&PetBook::UpdateField, this),
+        boost::bind(&PetBook::AddEntry, this),
         boost::bind(&PetBook::FilterBy, this),
         boost::bind(&PetBook::OrderBy, this),
         boost::bind(&PetBook::ClearSearch, this)
@@ -98,7 +106,6 @@ void PetBook::InitStringGen()
     {
         stringGen->AddStringFunc(g_operNames[i], stringFuncs[i]);
     }
-    
 }
 
 void PetBook::Start()
@@ -143,27 +150,46 @@ string& PetBook::MakeString()
     return stringGen->GenerateString(key);
 }
 
-// Result Displayers ///////////////////////////////////////////////////////
+// Result Displayers
 void PetBook::DisplayResults(ResultSet* res)
 {   
-    ResultSet* fields = GetFields();
-
-    if (0 != currId.compare("query"))   // editorial
+    if (0 != currId.compare("query"))       // editorial
     {
-        try
-        {
-            PreparedStatement* pstmt;
-            pstmt = con->prepareStatement(FindByCurrId());
-            res = pstmt->executeQuery();
-
-            ClearSearch();
-        }
-        catch (sql::SQLException &e)
-        {
-            cout << "# ERR: " << e.what() << endl;
-        }
+        res = GetEditResult();
+        ClearSearch();
     }
+    
+    PrintTable(res, GetFields());
+}
 
+ResultSet* PetBook::GetEditResult()
+{
+    ResultSet* res;
+
+    try
+    {
+        PreparedStatement* pstmt;
+        if (0 == currId.compare("new_id"))  // new entry added
+        {
+            pstmt = con->prepareStatement(FindByMaxId());
+        }
+        else
+        {
+            pstmt = con->prepareStatement(FindByCurrId());
+        }
+
+        res = pstmt->executeQuery();
+    }
+    catch (sql::SQLException &e)
+    {
+        cout << "# ERR: " << e.what() << endl;
+    }
+    
+    return res;
+}
+
+void PetBook::PrintTable(ResultSet* res, ResultSet* fields)
+{
     // print table headers
     for (fields->beforeFirst(); fields->next(); )
     {
@@ -184,7 +210,7 @@ void PetBook::DisplayResults(ResultSet* res)
     }
 }
 
-// Menu Displayers /////////////////////////////////////////////////////////
+// Menu Displayers
 void PetBook::DisplayOperMenu()
 {
     cout << "Select an operation by typing it.\n"
@@ -243,17 +269,8 @@ string& PetBook::FindBy()
     cin >> col;
 
     // enter value/s to search by
-    cout << "Enter a value for the parameter.\n"
-    << "To enter a number range, type the numbers like so:\n"
-    << "-r <min> <max>"
-    << endl;
     string val(""), val2("");
-    cin >> val;
-    if (0 == val.compare("-r"))
-    {
-        cin >> val;
-        cin >> val2;
-    }
+    GetSearchVals(val, val2);
 
     string* str = new string(g_findBy + GetRule(col, val, val2));
     return *str;
@@ -276,9 +293,8 @@ string& PetBook::FilterBy()
     cin >> col;
 
     // enter value/s to filter by
-    cout << "Enter a value for the parameter" << endl;
-    string val(""); //val2(""); // TO DO
-    cin >> val;
+    string val(""), val2("");
+    GetSearchVals(val, val2);
 
     string* str = new string(currQuery);
 
@@ -342,10 +358,61 @@ string& PetBook::UpdateField()
     return *str;
 }
 
+string& PetBook::AddEntry()
+{
+    currId = "new_id";
+
+    cout << "Enter the values for each parameter:" << endl;
+
+    // add columns to statement string
+    string* str = new string("INSERT INTO pets (");
+    ResultSet* res = GetFields();
+
+    res->next();
+    res->next();    // skip pk column
+    *str += res->getString("COLUMN_NAME");
+    while (res->next())
+    {
+        *str += (", " + res->getString("COLUMN_NAME"));
+    }
+
+    // add values from input to statement string
+    *str += ") VALUES (";
+    string val("");
+    
+    res->first();
+    res->next();    // skip pk column
+    cout << res->getString("COLUMN_NAME") << ": " << flush;
+    cin >> val;
+    *str += (isNum(val) ? val : ("'" + val + "'"));
+    while (res->next())
+    {
+        cout << res->getString("COLUMN_NAME") << ": " << flush;
+        cin >> val;
+        *str += (", " + (isNum(val) ? val : ("'" + val + "'")));
+    }
+    *str += ")";
+
+    return *str;
+}
+
+string& PetBook::RemoveEntry()
+{
+    // example:
+    // "DELETE FROM pets WHERE pk=id"
+}
+
+// helper operations
 string& PetBook::FindByCurrId()
 {
     string* str = new string(g_findBy + GetRule(g_pk, currId, ""));
     return *str;
+}
+
+string& PetBook::FindByMaxId()
+{
+    string* str = new string(g_findBy + g_pk + " = (SELECT MAX(" + g_pk + ") FROM pets)");
+    return *str; 
 }
 
 string& PetBook::ClearSearch()
@@ -354,24 +421,6 @@ string& PetBook::ClearSearch()
     currQuery = "";
     return *(new string(""));
 }
-
-
-
-
-// string& AddEntry()
-// {
-//     // the id of the entry must be the next free id number
-//     // get an SQL statement which provides it(?)
-//      // perhaps manage a list of free id's smaller than the highest occupied?
-//     // example:
-//     // "INSERT INTO pets VALUES (val1, val2, val3)"
-// }
-
-// string& RemoveEntry()
-// {
-//     // example:
-//     // "DELETE FROM pets WHERE pk=id"
-// }
 
 // Helper functions ////////////////////////////////////////////////////////
 static string& GetRule(const string& col, const string& val, const string& val2)
@@ -406,6 +455,20 @@ static bool isNum(const string& val)
     strtol(val.c_str(), &isText, 10);
 
     return false == *isText;
+}
+
+static void GetSearchVals(string& val, string& val2)
+{
+    cout << "Enter a value for the parameter.\n"
+    << "To enter a number range, type the numbers like so:\n"
+    << "-r <min> <max>"
+    << endl;
+    cin >> val;
+    if (0 == val.compare("-r"))
+    {
+        cin >> val;
+        cin >> val2;
+    }
 }
 
 } // namespace ashs
