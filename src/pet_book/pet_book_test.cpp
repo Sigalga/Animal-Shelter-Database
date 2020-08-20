@@ -7,7 +7,6 @@
 #include <cppconn/connection.h>     // sql::Connection
 
 #include "pet_book.hpp"
-#include "pet_book_string_funcs.hpp"
 
 using namespace sql;
 using namespace std;

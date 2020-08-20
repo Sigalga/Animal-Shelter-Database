@@ -14,7 +14,6 @@
 #include <boost/function.hpp>		// boost::function
 
 #include "pet_book.hpp"
-// #include "pet_book_string_funcs.hpp"
 
 using namespace sql;
 using namespace std;
@@ -22,28 +21,57 @@ using namespace std;
 namespace ashs
 {
 
-static const string g_findBy("SELECT * FROM pets WHERE ");
-static const string g_pk("pet_id");
+// helper funcs
 static bool isNum(const string& val);
 static string& GetRule(const string& col, const string& val, const string& val2);
 
+// statement strings
+static const string g_petBookDB("pet_book");
+static const string g_pk("pet_id");
+static const string g_getAll("SELECT * FROM pets");
+static const string g_findBy(g_getAll + " WHERE ");
+static const string g_getAllAsc(g_getAll + " ORDER BY " + g_pk + " ASC");
+
+// other consts
 static const string g_welcome("\nWelcome to the PetBook");
-static const size_t g_nOpers = 5;
+
+static const size_t g_nOpers = 7;
 static const PetBook::Key g_operNames[g_nOpers] =
 {
-    "exit",
-    "find",
-    "filter",
-    "update",
-    "show_all"
+    "exit",         // initial  secondary
+    "show_all",     // initial
+    "find",         // initial
+    "update",       // initial  secondary
+    "filter",       //          secondary
+    "order",        //          secondary
+    "new_search"    //          secondary
 };
 
-////////////////////////////////////////////////////////////////////
+static const size_t g_nInitOpers = 4;
+static const PetBook::Key g_initOperNames[g_nInitOpers] =
+{
+    "exit",         // initial  secondary
+    "show_all",     // initial
+    "find",         // initial
+    "update",       // initial  secondary
+};
+
+static const size_t g_nSecOpers = 5;
+static const PetBook::Key g_secOperNames[g_nSecOpers] =
+{
+    "exit",         // initial  secondary
+    "update",       // initial  secondary
+    "filter",       //          secondary
+    "order",        //          secondary
+    "new_search"    //          secondary
+};
+
+////////////////////////////////////s////////////////////////////////
 
 PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
     :   con(con),
         stringGen(stringGen),
-        petBookDB("pet_book"),
+        petBookDB(g_petBookDB),
         isRunning(false),
         currId(""),
         currQuery("")   
@@ -54,12 +82,23 @@ PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
 
 void PetBook::InitStringGen()
 {
+    static const PetBook::StringFunc stringFuncs[g_nOpers] =
+    {
+        boost::bind(&PetBook::Exit, this),
+        boost::bind(&PetBook::GetAll, this),
+        boost::bind(&PetBook::FindBy, this),
+        boost::bind(&PetBook::UpdateField, this),
+        boost::bind(&PetBook::FilterBy, this),
+        boost::bind(&PetBook::OrderBy, this),
+        boost::bind(&PetBook::ClearSearch, this)
+    };
+
     // Add operations
-    stringGen->AddStringFunc(g_operNames[0], boost::bind(&PetBook::Exit, this));
-    stringGen->AddStringFunc(g_operNames[1], boost::bind(&PetBook::FindBy, this));
-    stringGen->AddStringFunc(g_operNames[2], boost::bind(&PetBook::FilterBy, this));
-    stringGen->AddStringFunc(g_operNames[3], boost::bind(&PetBook::UpdateField, this));
-    stringGen->AddStringFunc(g_operNames[4], boost::bind(&PetBook::GetAll, this));
+    for (size_t i = 0; i < g_nOpers; i++)
+    {
+        stringGen->AddStringFunc(g_operNames[i], stringFuncs[i]);
+    }
+    
 }
 
 void PetBook::Start()
@@ -77,14 +116,17 @@ void PetBook::ExecuteInput()
     currQuery = MakeString();
     while (isRunning)
     {
-        try
+        if (0 != currQuery.compare(""))
         {
-            pstmt = con->prepareStatement(currQuery);
-            DisplayResults(pstmt->executeQuery());    
-        }
-        catch (sql::SQLException &e)
-        {
-            cout << "# ERR: " << e.what() << endl;
+            try
+            {
+                pstmt = con->prepareStatement(currQuery);
+                DisplayResults(pstmt->executeQuery());    
+            }
+            catch (sql::SQLException &e)
+            {
+                cout << "# ERR: " << e.what() << endl;
+            }
         }
 
         currQuery = MakeString();
@@ -106,14 +148,15 @@ void PetBook::DisplayResults(ResultSet* res)
 {   
     ResultSet* fields = GetFields();
 
-    if (0 != currId.compare("query"))
+    if (0 != currId.compare("query"))   // editorial
     {
         try
         {
             PreparedStatement* pstmt;
             pstmt = con->prepareStatement(FindByCurrId());
             res = pstmt->executeQuery();
-            currId = "query";
+
+            ClearSearch();
         }
         catch (sql::SQLException &e)
         {
@@ -121,11 +164,21 @@ void PetBook::DisplayResults(ResultSet* res)
         }
     }
 
+    // print table headers
+    for (fields->beforeFirst(); fields->next(); )
+    {
+        cout.width(10);
+        cout << fields->getString("COLUMN_NAME") << "\t" << left;
+    }
+    cout << endl;
+
+    // print result set
     while (res->next())
     {
         for (fields->beforeFirst(); fields->next(); )
         {
-            cout << res->getString(fields->getString("COLUMN_NAME")) << "\t";
+            cout.width(10);
+            cout << res->getString(fields->getString("COLUMN_NAME")) << "\t" << left;
         }
         cout << endl;
     }
@@ -137,9 +190,19 @@ void PetBook::DisplayOperMenu()
     cout << "Select an operation by typing it.\n"
     << "Available operations are:" << endl;
 
-    for (size_t i = 0; i < g_nOpers; i++)
+    if (0 == currId.compare("")) // new search
     {
-        cout << "- " << g_operNames[i]<< endl;
+        for (size_t i = 0; i < g_nInitOpers; i++)
+        {
+            cout << "- " << g_initOperNames[i]<< endl;
+        }
+    }
+    else    // continuous search
+    {
+        for (size_t i = 0; i < g_nSecOpers; i++)
+        {
+            cout << "- " << g_secOperNames[i]<< endl;
+        }
     }
 }
 
@@ -169,6 +232,7 @@ string& PetBook::Exit()
     return *(new string(""));
 }
 
+// initial queries
 string& PetBook::FindBy()
 {
     currId = "query";
@@ -195,6 +259,15 @@ string& PetBook::FindBy()
     return *str;
 }
 
+string& PetBook::GetAll()
+{
+    currId = "query";
+    
+    string* str = new string(g_getAllAsc);
+    return *str;
+}
+
+// secondary queries
 string& PetBook::FilterBy()
 {
     // enter column to filter by
@@ -203,18 +276,50 @@ string& PetBook::FilterBy()
     cin >> col;
 
     // enter value/s to filter by
-    string val(""); //val2(""); // TO DO
     cout << "Enter a value for the parameter" << endl;
+    string val(""); //val2(""); // TO DO
     cin >> val;
 
     string* str = new string(currQuery);
 
     // add rule
-    *str += " AND " + GetRule(col, val, "");
+    if (0 == str->compare(g_getAllAsc))
+    {
+        *str = (g_findBy + GetRule(col, val, ""));
+    }
+    else
+    {
+        *str += " AND " + GetRule(col, val, "");
+    }
 
     return *str;
 }
 
+string& PetBook::OrderBy()
+{
+    // enter column to order by
+    DisplayFieldMenu();
+    string col("");
+    cin >> col;
+
+    // enter ASC or DESC to order by
+    cout << "Enter the order (ASC / DESC)" << endl;
+    string order("");
+    cin >> order;
+
+    string* str = new string(currQuery);
+
+    // add rule
+    if (0 == str->compare(g_getAllAsc))
+    {
+        *str = g_getAll;
+    }
+    *str += " ORDER BY " + col + " " + order;
+
+    return *str;
+}
+
+// editorial operations
 string& PetBook::UpdateField()
 {
     // choose a single entry
@@ -243,11 +348,30 @@ string& PetBook::FindByCurrId()
     return *str;
 }
 
-string& PetBook::GetAll()
+string& PetBook::ClearSearch()
 {
-    string* str = new string("SELECT * FROM pets ORDER BY " + g_pk + " ASC");
-    return *str;
+    currId = "";
+    currQuery = "";
+    return *(new string(""));
 }
+
+
+
+
+// string& AddEntry()
+// {
+//     // the id of the entry must be the next free id number
+//     // get an SQL statement which provides it(?)
+//      // perhaps manage a list of free id's smaller than the highest occupied?
+//     // example:
+//     // "INSERT INTO pets VALUES (val1, val2, val3)"
+// }
+
+// string& RemoveEntry()
+// {
+//     // example:
+//     // "DELETE FROM pets WHERE pk=id"
+// }
 
 // Helper functions ////////////////////////////////////////////////////////
 static string& GetRule(const string& col, const string& val, const string& val2)

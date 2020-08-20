@@ -31,21 +31,39 @@ public:
     void Start();
     void Stop() { isRunning = false; }
 
-    // StringFuncs
+    // StringFuncs ///////////////////
     string& Exit();
+    // set currId and currQuery to ""
+    string& ClearSearch(); // TO DO
+
+    // initial queries
+    // called when currId == ""
+    // set currId to "query"
     string& FindBy();
-    string& FilterBy();
+    string& GetAll(); // TO DO: can't be secondarily ordered/filtered-by
+
+    // secondary queries
+    // called when currId == "query"
+    // may be concatenated to initial/secondary queries
+    string& FilterBy(); // TO DO: add a range input option
+    string& OrderBy();
+
+    // editorial
+    // final - clear the search when done
     string& UpdateField();
+    string& AddEntry(); // TO DO
+    string& RemoveEntry(); // TO DO
+
+    // hidden (for now)
     string& FindByCurrId();
-    string& GetAll();
 
 private:
     Connection* con;
     StmtStringGenerator* stringGen;
     string petBookDB;
     bool isRunning;
-    string currId;
-    string currQuery;
+    string currId;  // for update operations, otherwise "query"
+    string currQuery;   // for secondary operations
 
     // General flow functions //////////////////////////////////////////////////
     // Adds all the StringFuncs to the String Generator
