@@ -10,8 +10,8 @@
 #include <cppconn/exception.h>          // sql::SQLException
 
 // Boost includes
-#include <boost/bind.hpp>			// boost::bind
-#include <boost/function.hpp>		// boost::function
+#include <boost/bind.hpp>			    // boost::bind
+#include <boost/function.hpp>		    // boost::function
 
 #include "pet_book.hpp"
 
@@ -36,8 +36,14 @@ static const string g_getAllAsc(g_getAll + " ORDER BY " + g_pk + " ASC");
 // other consts
 static const string g_welcome("\nWelcome to the PetBook");
 
+static const size_t g_nInitOpers = 2;
+static const size_t g_nSecOpers = 3;
+static const size_t g_nInitSecOpers = 4;
+
 // names of all the ui operations
-static const size_t g_nOpers = 8;
+static const size_t g_nOpers =  g_nInitOpers +
+                                g_nSecOpers +
+                                g_nInitSecOpers;
 static const PetBook::Key g_operNames[g_nOpers] =
 {
     "exit",         // 0 initial  secondary
@@ -45,32 +51,37 @@ static const PetBook::Key g_operNames[g_nOpers] =
     "find",         // 2 initial
     "update",       // 3 initial  secondary
     "add_new",      // 4 initial  secondary
-    "filter",       // 5          secondary
-    "order",        // 6          secondary
-    "clear"         // 7          secondary
+    "delete",       // 5 initial  secondary
+    "filter",       // 6          secondary
+    "order",        // 7          secondary
+    "clear"         // 8          secondary
 };
 
 // names of ui operations to appear in a new search
-static const size_t g_nInitOpers = 5;
-static const PetBook::Key g_initOperNames[g_nInitOpers] =
+static const size_t g_nInitMenuOpers =  g_nInitOpers +
+                                        g_nInitSecOpers;
+static const PetBook::Key g_initOperNames[g_nInitMenuOpers] =
 {
     g_operNames[0],
     g_operNames[1],
     g_operNames[2],
     g_operNames[3],
-    g_operNames[4]
+    g_operNames[4],
+    g_operNames[5]
 };
 
 // names of ui operations to appear after an initial/secondary query
-static const size_t g_nSecOpers = 6;
-static const PetBook::Key g_secOperNames[g_nSecOpers] =
+static const size_t g_nSecMenuOpers =   g_nSecOpers +
+                                        g_nInitSecOpers;
+static const PetBook::Key g_secOperNames[g_nSecMenuOpers] =
 {
     g_operNames[0],
     g_operNames[3],
     g_operNames[4],
     g_operNames[5],
     g_operNames[6],
-    g_operNames[7]
+    g_operNames[7],
+    g_operNames[8]
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -96,6 +107,7 @@ void PetBook::InitStringGen()
         boost::bind(&PetBook::FindBy, this),
         boost::bind(&PetBook::UpdateField, this),
         boost::bind(&PetBook::AddEntry, this),
+        boost::bind(&PetBook::RemoveEntry, this),
         boost::bind(&PetBook::FilterBy, this),
         boost::bind(&PetBook::OrderBy, this),
         boost::bind(&PetBook::ClearSearch, this)
@@ -173,7 +185,7 @@ ResultSet* PetBook::GetEditResult()
         {
             pstmt = con->prepareStatement(FindByMaxId());
         }
-        else
+        else                                // entry edited
         {
             pstmt = con->prepareStatement(FindByCurrId());
         }
@@ -218,14 +230,14 @@ void PetBook::DisplayOperMenu()
 
     if (0 == currId.compare("")) // new search
     {
-        for (size_t i = 0; i < g_nInitOpers; i++)
+        for (size_t i = 0; i < g_nInitMenuOpers; i++)
         {
             cout << "- " << g_initOperNames[i]<< endl;
         }
     }
     else    // continuous search
     {
-        for (size_t i = 0; i < g_nSecOpers; i++)
+        for (size_t i = 0; i < g_nSecMenuOpers; i++)
         {
             cout << "- " << g_secOperNames[i]<< endl;
         }
@@ -398,8 +410,14 @@ string& PetBook::AddEntry()
 
 string& PetBook::RemoveEntry()
 {
-    // example:
-    // "DELETE FROM pets WHERE pk=id"
+    // choose a single entry
+    cout << "choose an entry and enter its pet_id" << endl;
+    cin >> currId;
+    
+    string* str = new string("DELETE FROM pets");
+    *str += (" WHERE " + g_pk + "=" + currId + ";");
+
+    return *str;
 }
 
 // helper operations

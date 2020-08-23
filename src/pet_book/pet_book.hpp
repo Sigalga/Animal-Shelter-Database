@@ -31,31 +31,6 @@ public:
     void Start();
     void Stop() { isRunning = false; }
 
-    // StringFuncs ///////////////////
-    string& Exit();
-
-    // forget all initial/concatenated queries
-    string& ClearSearch();
-
-    // initial queries
-    string& FindBy();
-    string& GetAll();
-
-    // secondary queries
-    // may be concatenated to initial/secondary queries
-    string& FilterBy();
-    string& OrderBy();
-
-    // editorial operations
-    // clear the search when done, modified item is displayed
-    string& UpdateField();
-    string& AddEntry();
-    string& RemoveEntry(); // TO DO
-
-    // hidden (for now)
-    string& FindByCurrId();
-    string& FindByMaxId();
-
 private:
     Connection* con;
     StmtStringGenerator* stringGen;
@@ -64,7 +39,7 @@ private:
     string currId;      // for update operations, otherwise "query" or empty
     string currQuery;   // for secondary operations concatenation
 
-    // General flow functions //////////////////////////////////////////////////
+    // Main flow functions /////////////////////////////////////////////////////
     // Adds all the StringFuncs to the String Generator
     void InitStringGen();
 
@@ -93,6 +68,31 @@ private:
 
     // Prints a Resultset in a table view by <fields>
     void PrintTable(ResultSet* res, ResultSet* fields);
+
+    // StringFuncs /////////////////////////////////////////////////////////////
+    string& Exit();
+
+    // forget all initial/concatenated queries
+    string& ClearSearch();
+
+    // initial queries
+    string& FindBy();
+    string& GetAll();
+
+    // secondary queries
+    // may be concatenated to initial/secondary queries
+    string& FilterBy();
+    string& OrderBy();
+
+    // editorial operations
+    // clear the search when done, modified item is displayed
+    string& UpdateField();
+    string& AddEntry();
+    string& RemoveEntry(); // TO DO
+
+    // helper operations
+    string& FindByCurrId();
+    string& FindByMaxId();
 
 };
 
