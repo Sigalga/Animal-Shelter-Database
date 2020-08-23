@@ -28,7 +28,12 @@ static void GetSearchVals(string& val, string& val2);
 
 // statement strings
 static const string g_petBookDB("pet_book");
+static const string g_petsTable("pets");
+static const string g_adopTable("adopters");
+static const string g_defaultTable(g_petsTable);
+
 static const string g_pk("pet_id");
+// SELECT COL
 static const string g_getAll("SELECT * FROM pets");
 static const string g_findBy(g_getAll + " WHERE ");
 static const string g_getAllAsc(g_getAll + " ORDER BY " + g_pk + " ASC");
@@ -91,6 +96,7 @@ PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
         stringGen(stringGen),
         petBookDB(g_petBookDB),
         isRunning(false),
+        currTable(g_defaultTable),
         currId(""),
         currQuery("")   
 {
@@ -292,7 +298,10 @@ string& PetBook::GetAll()
 {
     currId = "query";
     
-    string* str = new string(g_getAllAsc);
+    // string* str = new string(g_getAllAsc);
+
+    string* str = new string(GetDataAsc());
+
     return *str;
 }
 
@@ -487,6 +496,16 @@ static void GetSearchVals(string& val, string& val2)
         cin >> val;
         cin >> val2;
     }
+}
+
+const string& PetBook::GetCurrPK()
+{
+    PreparedStatement* pstmt = con->prepareStatement(
+        "SHOW KEYS FROM " + currTable + " WHERE Key_name = 'PRIMARY';");
+    ResultSet* res = pstmt->executeQuery();
+    res->next();
+    string* str = new string(res->getString("COLUMN_NAME"));
+    return *str;
 }
 
 } // namespace ashs

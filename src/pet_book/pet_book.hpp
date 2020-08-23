@@ -27,15 +27,19 @@ public:
     ~PetBook() {}
 
     void SetDatabase(const string& db) { petBookDB = db; }
+    const string& GetCurrPK();
 
     void Start();
     void Stop() { isRunning = false; }
+
+    
 
 private:
     Connection* con;
     StmtStringGenerator* stringGen;
     string petBookDB;
     bool isRunning;
+    string currTable;   // for datatable choice
     string currId;      // for update operations, otherwise "query" or empty
     string currQuery;   // for secondary operations concatenation
 
@@ -93,7 +97,9 @@ private:
     // helper operations
     string& FindByCurrId();
     string& FindByMaxId();
-
+    const string& GetData() { return *(new string("SELECT * FROM " + currTable)); }
+    // const string& GetDataWhere() { return GetData() + " WHERE "; }
+    const string& GetDataAsc() { return *(new string(GetData() + " ORDER BY " + GetCurrPK() + " ASC")); }
 };
 
 

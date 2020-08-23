@@ -19,6 +19,7 @@ static void AtExit();
 // Test functions
 static void InitTest();
 static void StartTest();
+static void GetPKTest();
 
 // server data
 static const string URL="tcp://127.0.0.1:3306";
@@ -34,6 +35,7 @@ int main()
 	
 	InitTest();
 	StartTest();
+	GetPKTest();
 
 	AtExit();
 
@@ -73,4 +75,11 @@ static void StartTest()
 	StmtStringGenerator strGen;
     PetBook petBook(g_con, &strGen);
     petBook.Start();
+}
+
+static void GetPKTest()
+{
+	StmtStringGenerator strGen;
+    PetBook petBook(g_con, &strGen);
+    cout << petBook.GetCurrPK() << endl;
 }
