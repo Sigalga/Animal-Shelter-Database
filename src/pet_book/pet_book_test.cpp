@@ -20,22 +20,24 @@ static void AtExit();
 static void InitTest();
 static void StartTest();
 static void GetPKTest();
+static void GetAllTest();
 
 // server data
-static const string URL="tcp://127.0.0.1:3306";
-static const string USER="root";
-static const string PASS="root";
+static const string URL = "tcp://127.0.0.1:3306";
+static const string USER = "root";
+static const string PASS = "root";
 
-static mysql::MySQL_Driver* g_driver;
-static Connection* g_con;
+static mysql::MySQL_Driver* g_driver = NULL;
+static Connection* g_con = NULL;
 
 int main()
 {
 	ConnectToSQL();
 	
-	InitTest();
-	StartTest();
-	GetPKTest();
+	// InitTest();
+	// StartTest();
+	// GetPKTest();
+	GetAllTest();
 
 	AtExit();
 
@@ -82,4 +84,11 @@ static void GetPKTest()
 	StmtStringGenerator strGen;
     PetBook petBook(g_con, &strGen);
     cout << petBook.GetCurrPK() << endl;
+}
+
+static void GetAllTest()
+{
+	StmtStringGenerator strGen;
+    PetBook petBook(g_con, &strGen);
+    // cout << petBook.ExecuteInput() << endl;
 }

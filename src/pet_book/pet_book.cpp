@@ -97,8 +97,10 @@ PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
         petBookDB(g_petBookDB),
         isRunning(false),
         currTable(g_defaultTable),
+        currPK(""),
         currId(""),
-        currQuery("")   
+        currQuery(""),
+        stmtString("")
 {
 	con->setSchema(petBookDB);
     InitStringGen();
@@ -136,8 +138,6 @@ void PetBook::Start()
 
 void PetBook::ExecuteInput()
 {
-    PreparedStatement* pstmt;
-    
     currQuery = MakeString();
     while (isRunning)
     {
@@ -145,8 +145,10 @@ void PetBook::ExecuteInput()
         {
             try
             {
-                pstmt = con->prepareStatement(currQuery);
-                DisplayResults(pstmt->executeQuery());    
+                PreparedStatement* pstmt = con->prepareStatement(currQuery);
+                DisplayResults(pstmt->executeQuery());
+
+                delete pstmt;
             }
             catch (sql::SQLException &e)
             {
@@ -273,7 +275,7 @@ ResultSet* PetBook::GetFields()
 string& PetBook::Exit()
 {
     isRunning = false;
-    return *(new string(""));
+    return stmtString;
 }
 
 // initial queries
@@ -290,19 +292,16 @@ string& PetBook::FindBy()
     string val(""), val2("");
     GetSearchVals(val, val2);
 
-    string* str = new string(g_findBy + GetRule(col, val, val2));
-    return *str;
+    stmtString = (g_findBy + GetRule(col, val, val2));
+    return stmtString;
 }
 
 string& PetBook::GetAll()
 {
     currId = "query";
-    
-    // string* str = new string(g_getAllAsc);
 
-    string* str = new string(GetDataAsc());
-
-    return *str;
+    SelectDataAsc();
+    return currQuery;
 }
 
 // secondary queries
@@ -498,14 +497,45 @@ static void GetSearchVals(string& val, string& val2)
     }
 }
 
-const string& PetBook::GetCurrPK()
+string& PetBook::GetCurrPK()
 {
-    PreparedStatement* pstmt = con->prepareStatement(
-        "SHOW KEYS FROM " + currTable + " WHERE Key_name = 'PRIMARY';");
-    ResultSet* res = pstmt->executeQuery();
-    res->next();
-    string* str = new string(res->getString("COLUMN_NAME"));
-    return *str;
+    try
+    {
+        PreparedStatement* pstmt = con->prepareStatement(
+            "SHOW KEYS FROM " + currTable + " WHERE Key_name = 'PRIMARY';");
+        ResultSet* res = pstmt->executeQuery();
+        res->next();
+        currPK = (res->getString("COLUMN_NAME"));
+
+        delete res;
+        delete pstmt;
+    }
+    catch (sql::SQLException &e)
+    {
+        cout << "# ERR: " << e.what() << endl;
+    }
+
+    return currPK;
+}
+
+string& PetBook::SelectData()
+{
+    currQuery = ("SELECT * FROM " + currTable);
+    return currQuery;
+}
+
+string& PetBook::SelectDataWhere()
+{
+    SelectData();
+    currQuery += " WHERE ";
+    return currQuery;
+}
+
+string& PetBook::SelectDataAsc()
+{
+    SelectData();
+    currQuery += (" ORDER BY " + GetCurrPK() + " ASC");
+    return currQuery;
 }
 
 } // namespace ashs
