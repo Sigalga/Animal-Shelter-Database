@@ -27,8 +27,16 @@ public:
     ~PetBook() { delete m_fields; }
 
     void SetDatabase(const string& db) { petBookDB = db; }
-    void SetDataTable(const string& table) { currTable = table; GetFields(); }
-    string& GetCurrPK();
+    void SetDataTable(const string& table)
+    {
+        currTable = table;
+        m_fields = GetFields();
+        // currPK = GetcurrPK();
+        SetCurrPK();;
+    }
+    // string& GetCurrPK();
+    void SetCurrPK();
+
 
     void Start();
     void Stop() { isRunning = false; }
@@ -43,7 +51,7 @@ private:
     string currId;      // for update operations, otherwise "query" or empty
     string currQuery;   // for secondary operations concatenation
     string stmtString;  // for stringFuncs
-    ResultSet* m_fields;  // datatable fields
+    ResultSet* m_fields;// datatable fields
 
     // Main flow functions /////////////////////////////////////////////////////
     // Adds all the StringFuncs to the String Generator
@@ -74,7 +82,7 @@ private:
 
     // Prints a Resultset in a table view by <fields>
     // void PrintTable(ResultSet* res, ResultSet* fields);
-    void PrintTable(ResultSet* res, ResultSet* fields);
+    void PrintTable(ResultSet* res);
 
     // StringFuncs /////////////////////////////////////////////////////////////
     string& Exit();

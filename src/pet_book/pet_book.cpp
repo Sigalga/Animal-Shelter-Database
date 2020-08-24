@@ -170,7 +170,7 @@ string& PetBook::MakeString()
     return stringGen->GenerateString(key);
 }
 
-// Result Displayers    // TO DO: make "fields" a member, setupon init and delete in dtor.
+// Result Displayers
 void PetBook::DisplayResults(ResultSet* res)
 {   
     if (0 != currId.compare("query"))       // editorial
@@ -180,10 +180,8 @@ void PetBook::DisplayResults(ResultSet* res)
         ClearSearch();
     }
 
-    ResultSet* fields = GetFields();
-    PrintTable(res, fields);
+    PrintTable(res);
 
-    delete fields;
     delete res;
 }
 
@@ -215,23 +213,23 @@ ResultSet* PetBook::GetEditResult()
     return res;
 }
 
-void PetBook::PrintTable(ResultSet* res, ResultSet* fields)
+void PetBook::PrintTable(ResultSet* res)
 {
     // print table headers
-    for (fields->beforeFirst(); fields->next(); )
+    for (m_fields->beforeFirst(); m_fields->next(); )
     {
         cout.width(10);
-        cout << fields->getString("COLUMN_NAME") << "\t" << left;
+        cout << m_fields->getString("COLUMN_NAME") << "\t" << left;
     }
     cout << endl;
 
     // print result set
     while (res->next())
     {
-        for (fields->beforeFirst(); fields->next(); )
+        for (m_fields->beforeFirst(); m_fields->next(); )
         {
             cout.width(10);
-            cout << res->getString(fields->getString("COLUMN_NAME")) << "\t" << left;
+            cout << res->getString(m_fields->getString("COLUMN_NAME")) << "\t" << left;
         }
         cout << endl;
     }
@@ -259,17 +257,15 @@ void PetBook::DisplayOperMenu()
     }
 }
 
-void PetBook::DisplayFieldMenu() // TO DO: make "fields" a member, setupon init and delete in dtor.
+void PetBook::DisplayFieldMenu()
 {
     cout << "Enter the parameter to search by or modify. options are:" << endl;
 
-    ResultSet* fields = GetFields();
-    while (fields->next())
+    m_fields->first();
+    while (m_fields->next())
     {
-        cout << "- " << fields->getString("COLUMN_NAME") << endl;
+        cout << "- " << m_fields->getString("COLUMN_NAME") << endl;
     }
-
-    delete fields;
 }
 
 ResultSet* PetBook::GetFields()
@@ -277,7 +273,6 @@ ResultSet* PetBook::GetFields()
     PreparedStatement* pstmt = con->prepareStatement(
         "select COLUMN_NAME from information_schema.COLUMNS where TABLE_NAME='" + currTable + "'");
     ResultSet* fields = pstmt->executeQuery();
-    // m_fields = fields; //#######3
 
     delete pstmt;
 
@@ -389,7 +384,7 @@ string& PetBook::UpdateField()
     string val("");
     cin >> val;
     
-    const string pk(GetCurrPK());
+    const string pk(/*Get*/currPK/*()*/);
     currQuery = ("UPDATE pets SET " + col + "='" + val + "' WHERE " + pk + "=" + currId + ";");
     return currQuery;
 }
@@ -402,34 +397,29 @@ string& PetBook::AddEntry()
 
     // add columns to statement string
     currQuery = "INSERT INTO pets (";
-
-    ResultSet* res = GetFields();
-    res->next();
-    res->next();    // skip pk column
-    currQuery += res->getString("COLUMN_NAME");
-    while (res->next())
+    m_fields->first();
+    m_fields->next();    // skip pk column
+    currQuery += m_fields->getString("COLUMN_NAME");
+    while (m_fields->next())
     {
-        currQuery += (", " + res->getString("COLUMN_NAME"));
+        currQuery += (", " + m_fields->getString("COLUMN_NAME"));
     }
 
     // add values from input to statement string
     currQuery += ") VALUES (";
-    
-    res->first();
-    res->next();    // skip pk column
-    cout << res->getString("COLUMN_NAME") << ": " << flush;
+    m_fields->first();
+    m_fields->next();    // skip pk column
+    cout << m_fields->getString("COLUMN_NAME") << ": " << flush;
     string val("");
     cin >> val;
     currQuery += (isNum(val) ? val : ("'" + val + "'"));
-    while (res->next())
+    while (m_fields->next())
     {
-        cout << res->getString("COLUMN_NAME") << ": " << flush;
+        cout << m_fields->getString("COLUMN_NAME") << ": " << flush;
         cin >> val;
         currQuery += (", " + (isNum(val) ? val : ("'" + val + "'")));
     }
     currQuery += ")";
-
-    delete res;
 
     return currQuery;
 }
@@ -440,25 +430,25 @@ string& PetBook::RemoveEntry()
     cout << "choose an entry and enter its pet_id" << endl;
     cin >> currId;
     
-    const string pk(GetCurrPK());
+    const string pk(/*Get*/currPK/*()*/);
     currQuery = ("DELETE FROM " + currTable + " WHERE " + pk + "=" + currId + ";");
     return currQuery;
 }
 
 // helper operations
-string& PetBook::FindByCurrId()
+string& PetBook::FindByCurrId() // TO DO: make pk a member, changig automatically when setting a table
 {
-    const string pk(GetCurrPK());
+    const string pk(/*Get*/currPK/*()*/);
     const string select(SelectDataWhere());
     const string rule(GetRule(pk, currId, ""));
     stmtString = (select + rule);
     return stmtString;
 }
 
-string& PetBook::FindByMaxId()
+string& PetBook::FindByMaxId()  // TO DO: same.
 {
     const string select(SelectDataWhere());
-    const string pk(GetCurrPK());
+    const string pk(/*Get*/currPK/*()*/);
     stmtString = (select + pk + " = (SELECT MAX(" + pk + ") FROM pets)");
     return stmtString; 
 }
@@ -517,7 +507,8 @@ static void GetSearchVals(string& val, string& val2)
     }
 }
 
-string& PetBook::GetCurrPK()
+void PetBook::SetCurrPK()
+// string& PetBook::GetCurrPK()
 {
     try
     {
@@ -535,7 +526,7 @@ string& PetBook::GetCurrPK()
         cout << "# ERR: " << e.what() << endl;
     }
 
-    return currPK;
+    // return stmtString;
 }
 
 string& PetBook::SelectData()
@@ -554,7 +545,7 @@ string& PetBook::SelectDataWhere()
 string& PetBook::SelectDataAsc()
 {
     SelectData();
-    stmtString += (" ORDER BY " + GetCurrPK() + " ASC");
+    stmtString += (" ORDER BY " + /*Get*/currPK/*()*/ + " ASC");
     return stmtString;
 }
 

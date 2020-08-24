@@ -83,7 +83,7 @@ static void GetPKTest()
 {
 	StmtStringGenerator strGen;
     PetBook petBook(g_con, &strGen);
-    cout << petBook.GetCurrPK() << endl;
+    // cout << petBook.GetCurrPK() << endl;
 }
 
 static void GetAllTest()
