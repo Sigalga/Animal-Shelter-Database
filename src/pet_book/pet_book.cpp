@@ -99,7 +99,8 @@ PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
         currPK(""),
         currId(""),
         currQuery(""),
-        stmtString("")
+        stmtString(""),
+        m_fields(GetFields())
 {
 	con->setSchema(petBookDB);
     InitStringGen();
@@ -274,8 +275,9 @@ void PetBook::DisplayFieldMenu() // TO DO: make "fields" a member, setupon init 
 ResultSet* PetBook::GetFields()
 {
     PreparedStatement* pstmt = con->prepareStatement(
-        "select COLUMN_NAME from information_schema.COLUMNS where TABLE_NAME='pets'");
+        "select COLUMN_NAME from information_schema.COLUMNS where TABLE_NAME='" + currTable + "'");
     ResultSet* fields = pstmt->executeQuery();
+    // m_fields = fields; //#######3
 
     delete pstmt;
 

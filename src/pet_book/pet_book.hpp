@@ -24,7 +24,7 @@ public:
     using StringFunc = StmtStringGenerator::StringFunc;
 
     PetBook(Connection* con, StmtStringGenerator* stringGen);
-    // ~PetBook() { delete fields; }
+    ~PetBook() { delete m_fields; }
 
     void SetDatabase(const string& db) { petBookDB = db; }
     void SetDataTable(const string& table) { currTable = table; GetFields(); }
@@ -43,7 +43,7 @@ private:
     string currId;      // for update operations, otherwise "query" or empty
     string currQuery;   // for secondary operations concatenation
     string stmtString;  // for stringFuncs
-    // ResultSet* fields;  // datatable fields
+    ResultSet* m_fields;  // datatable fields
 
     // Main flow functions /////////////////////////////////////////////////////
     // Adds all the StringFuncs to the String Generator
