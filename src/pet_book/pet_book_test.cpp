@@ -35,9 +35,9 @@ int main()
 	ConnectToSQL();
 	
 	// InitTest();
-	// StartTest();
+	StartTest();
 	// GetPKTest();
-	GetAllTest();
+	// GetAllTest();
 
 	AtExit();
 

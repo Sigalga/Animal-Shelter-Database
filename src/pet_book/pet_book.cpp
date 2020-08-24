@@ -22,7 +22,6 @@ namespace ashs
 {
 
 // helper funcs
-static string& GetRule(const string& col, const string& val, const string& val2);
 static bool isNum(const string& val);
 static void GetSearchVals(string& val, string& val2);
 
@@ -170,16 +169,21 @@ string& PetBook::MakeString()
     return stringGen->GenerateString(key);
 }
 
-// Result Displayers
+// Result Displayers    // TO DO: make "fields" a member, setupon init and delete in dtor.
 void PetBook::DisplayResults(ResultSet* res)
 {   
     if (0 != currId.compare("query"))       // editorial
     {
+        delete res;
         res = GetEditResult();
         ClearSearch();
     }
-    
-    PrintTable(res, GetFields());
+
+    ResultSet* fields = GetFields();
+    PrintTable(res, fields);
+
+    delete fields;
+    delete res;
 }
 
 ResultSet* PetBook::GetEditResult()
@@ -199,6 +203,8 @@ ResultSet* PetBook::GetEditResult()
         }
 
         res = pstmt->executeQuery();
+
+        delete pstmt;
     }
     catch (sql::SQLException &e)
     {
@@ -252,23 +258,28 @@ void PetBook::DisplayOperMenu()
     }
 }
 
-void PetBook::DisplayFieldMenu()
+void PetBook::DisplayFieldMenu() // TO DO: make "fields" a member, setupon init and delete in dtor.
 {
     cout << "Enter the parameter to search by or modify. options are:" << endl;
 
-    ResultSet* res = GetFields();
-    while (res->next())
+    ResultSet* fields = GetFields();
+    while (fields->next())
     {
-        cout << "- " << res->getString("COLUMN_NAME") << endl;
+        cout << "- " << fields->getString("COLUMN_NAME") << endl;
     }
+
+    delete fields;
 }
 
 ResultSet* PetBook::GetFields()
 {
     PreparedStatement* pstmt = con->prepareStatement(
         "select COLUMN_NAME from information_schema.COLUMNS where TABLE_NAME='pets'");
+    ResultSet* fields = pstmt->executeQuery();
 
-    return pstmt->executeQuery();
+    delete pstmt;
+
+    return fields;
 }
 
 // StringFuncs /////////////////////////////////////////////////////////////
@@ -292,15 +303,18 @@ string& PetBook::FindBy()
     string val(""), val2("");
     GetSearchVals(val, val2);
 
-    stmtString = (g_findBy + GetRule(col, val, val2));
-    return stmtString;
+    const string select(SelectDataWhere());
+    const string rule(GetRule(col, val, val2));
+
+    currQuery = (select + rule);
+    return currQuery;
 }
 
 string& PetBook::GetAll()
 {
     currId = "query";
 
-    SelectDataAsc();
+    currQuery = SelectDataAsc();
     return currQuery;
 }
 
@@ -316,19 +330,21 @@ string& PetBook::FilterBy()
     string val(""), val2("");
     GetSearchVals(val, val2);
 
-    string* str = new string(currQuery);
-
     // add rule
-    if (0 == str->compare(g_getAllAsc))
+    const string rule(GetRule(col, val, ""));
+    const string getAll(SelectDataAsc());
+
+    if (0 == currQuery.compare(getAll))
     {
-        *str = (g_findBy + GetRule(col, val, ""));
+        const string select(SelectDataWhere());
+        currQuery = (select + rule);
     }
     else
     {
-        *str += " AND " + GetRule(col, val, "");
+        currQuery += (" AND " + rule);
     }
 
-    return *str;
+    return currQuery;
 }
 
 string& PetBook::OrderBy()
@@ -343,19 +359,18 @@ string& PetBook::OrderBy()
     string order("");
     cin >> order;
 
-    string* str = new string(currQuery);
-
     // add rule
-    if (0 == str->compare(g_getAllAsc))
+    const string getAll(SelectDataAsc());
+    if (0 == currQuery.compare(getAll))
     {
-        *str = g_getAll;
+        currQuery = g_getAll;
     }
-    *str += " ORDER BY " + col + " " + order;
+    currQuery += " ORDER BY " + col + " " + order;
 
-    return *str;
+    return currQuery;
 }
 
-// editorial operations
+// editorial operations // TO DO: fix memory leakage
 string& PetBook::UpdateField()
 {
     // choose a single entry
@@ -372,10 +387,9 @@ string& PetBook::UpdateField()
     string val("");
     cin >> val;
     
-    string* str = new string("UPDATE pets SET ");
-    *str += (col + "='" + val + "' WHERE " + g_pk + "=" + currId + ";");
-
-    return *str;
+    const string pk(GetCurrPK());
+    currQuery = ("UPDATE pets SET " + col + "='" + val + "' WHERE " + pk + "=" + currId + ";");
+    return currQuery;
 }
 
 string& PetBook::AddEntry()
@@ -385,35 +399,37 @@ string& PetBook::AddEntry()
     cout << "Enter the values for each parameter:" << endl;
 
     // add columns to statement string
-    string* str = new string("INSERT INTO pets (");
-    ResultSet* res = GetFields();
+    currQuery = "INSERT INTO pets (";
 
+    ResultSet* res = GetFields();
     res->next();
     res->next();    // skip pk column
-    *str += res->getString("COLUMN_NAME");
+    currQuery += res->getString("COLUMN_NAME");
     while (res->next())
     {
-        *str += (", " + res->getString("COLUMN_NAME"));
+        currQuery += (", " + res->getString("COLUMN_NAME"));
     }
 
     // add values from input to statement string
-    *str += ") VALUES (";
-    string val("");
+    currQuery += ") VALUES (";
     
     res->first();
     res->next();    // skip pk column
     cout << res->getString("COLUMN_NAME") << ": " << flush;
+    string val("");
     cin >> val;
-    *str += (isNum(val) ? val : ("'" + val + "'"));
+    currQuery += (isNum(val) ? val : ("'" + val + "'"));
     while (res->next())
     {
         cout << res->getString("COLUMN_NAME") << ": " << flush;
         cin >> val;
-        *str += (", " + (isNum(val) ? val : ("'" + val + "'")));
+        currQuery += (", " + (isNum(val) ? val : ("'" + val + "'")));
     }
-    *str += ")";
+    currQuery += ")";
 
-    return *str;
+    delete res;
+
+    return currQuery;
 }
 
 string& PetBook::RemoveEntry()
@@ -422,57 +438,59 @@ string& PetBook::RemoveEntry()
     cout << "choose an entry and enter its pet_id" << endl;
     cin >> currId;
     
-    string* str = new string("DELETE FROM pets");
-    *str += (" WHERE " + g_pk + "=" + currId + ";");
-
-    return *str;
+    const string pk(GetCurrPK());
+    currQuery = ("DELETE FROM " + currTable + " WHERE " + pk + "=" + currId + ";");
+    return currQuery;
 }
 
 // helper operations
 string& PetBook::FindByCurrId()
 {
-    string* str = new string(g_findBy + GetRule(g_pk, currId, ""));
-    return *str;
+    const string pk(GetCurrPK());
+    const string select(SelectDataWhere());
+    const string rule(GetRule(pk, currId, ""));
+    stmtString = (select + rule);
+    return stmtString;
 }
 
 string& PetBook::FindByMaxId()
 {
-    string* str = new string(g_findBy + g_pk + " = (SELECT MAX(" + g_pk + ") FROM pets)");
-    return *str; 
+    const string select(SelectDataWhere());
+    const string pk(GetCurrPK());
+    stmtString = (select + pk + " = (SELECT MAX(" + pk + ") FROM pets)");
+    return stmtString; 
 }
 
 string& PetBook::ClearSearch()
 {
     currId = "";
     currQuery = "";
-    return *(new string(""));
+    return currQuery;
 }
 
 // Helper functions ////////////////////////////////////////////////////////
-static string& GetRule(const string& col, const string& val, const string& val2)
+string& PetBook::GetRule(const string& col, const string& val, const string& val2)
 {
-    string* rule = new string;
-    
     if (isNum(val))
     {
         if ("" == val2)
         {
             // find by number
-            *rule = (col + "=" + val);
+            stmtString = (col + "=" + val);
         }
         else
         {
             // find by range
-            *rule = (col + " BETWEEN " + val + " AND " + val2);
+            stmtString = (col + " BETWEEN " + val + " AND " + val2);
         }
     }
     else
     {
-        // find by text
-        *rule = (col + " LIKE '%" + val + "%'");
+        // fid by text
+        stmtString = (col + " LIKE '%" + val + "%'");
     }
 
-    return *rule;
+    return stmtString;
 }
 
 static bool isNum(const string& val)
@@ -520,22 +538,22 @@ string& PetBook::GetCurrPK()
 
 string& PetBook::SelectData()
 {
-    currQuery = ("SELECT * FROM " + currTable);
-    return currQuery;
+    stmtString = ("SELECT * FROM " + currTable);
+    return stmtString;
 }
 
 string& PetBook::SelectDataWhere()
 {
     SelectData();
-    currQuery += " WHERE ";
-    return currQuery;
+    stmtString += " WHERE ";
+    return stmtString;
 }
 
 string& PetBook::SelectDataAsc()
 {
     SelectData();
-    currQuery += (" ORDER BY " + GetCurrPK() + " ASC");
-    return currQuery;
+    stmtString += (" ORDER BY " + GetCurrPK() + " ASC");
+    return stmtString;
 }
 
 } // namespace ashs

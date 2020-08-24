@@ -101,6 +101,7 @@ private:
     string& SelectData();
     string& SelectDataWhere();
     string& SelectDataAsc();
+    string& GetRule(const string& col, const string& val, const string& val2);
 };
 
 
