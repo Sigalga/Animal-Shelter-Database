@@ -10,11 +10,6 @@ void StmtStringGenerator::AddStringFunc(const Key key, StringFunc func)
     stringFuncs.insert(pair<Key, StringFunc>(key, func));
 }
 
-// void StmtStringGenerator::AddStringFunc(const string& str, StringFunc func)
-// {
-//     stringFuncs.insert(pair<Key, StringFunc>(const_cast<string&>(str), func));
-// }
-
 void StmtStringGenerator::AddStringFunc(const char* cStr, StringFunc func)
 {
     string str(cStr);
@@ -45,11 +40,11 @@ vector<StmtStringGenerator::Key>* StmtStringGenerator::GetKeys()
     return vec;
 }
 
-string& StmtStringGenerator::GenerateString(const Key key, const string& col, const string& val1, const string& val2)
+string& StmtStringGenerator::GenerateString(const Key key)
 {
     try
     {
-        return stringFuncs.at(key)(col, val1, val2);
+        return stringFuncs.at(key)();
     }
     catch(const std::out_of_range& e)
     {

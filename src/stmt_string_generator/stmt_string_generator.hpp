@@ -16,13 +16,12 @@ namespace ashs
 class StmtStringGenerator
 {
 public:
-    typedef string Key;
-    // typedef string&(*StringFunc)(const string&, const string&);
-    typedef boost::function<string& (const string&, const string&, const string&)> StringFunc; //
-    typedef map<Key, StringFunc> FuncMap;
-
+    typedef string                      Key;
+    typedef boost::function<string&()>  StringFunc;
+    typedef map<Key, StringFunc>        FuncMap;
+    
+    
     void AddStringFunc(const Key key, StringFunc func);
-    // void AddStringFunc(const string& str, StringFunc func);
     void AddStringFunc(const char* cStr, StringFunc func);
 
     void RemoveStringFunc(const Key key);
@@ -30,7 +29,9 @@ public:
     // Returns a vector of all stringFuncs keys
     vector<Key>* GetKeys();
 
-    string& GenerateString(const Key key, const string& col, const string& val1, const string& val2);
+    string& GenerateString(const Key key);
+
+    void AtExit();
 
 private:
     FuncMap stringFuncs;
