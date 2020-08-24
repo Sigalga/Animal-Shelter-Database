@@ -48,7 +48,7 @@ string& StmtStringGenerator::GenerateString(const Key key)
     }
     catch(const std::out_of_range& e)
     {
-        return *(new string(""));
+        return nullStr;
     }
 }
 

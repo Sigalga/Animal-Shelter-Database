@@ -20,6 +20,7 @@ public:
     typedef boost::function<string&()>  StringFunc;
     typedef map<Key, StringFunc>        FuncMap;
     
+    StmtStringGenerator() : nullStr("") {}
     
     void AddStringFunc(const Key key, StringFunc func);
     void AddStringFunc(const char* cStr, StringFunc func);
@@ -35,6 +36,7 @@ public:
 
 private:
     FuncMap stringFuncs;
+    string nullStr;
 };
 
 } // namespace ashs
