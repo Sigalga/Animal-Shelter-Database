@@ -103,6 +103,7 @@ PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
         m_fields(GetFields())
 {
 	con->setSchema(petBookDB);
+    SetCurrPK();
     InitStringGen();
 }
 
@@ -384,8 +385,7 @@ string& PetBook::UpdateField()
     string val("");
     cin >> val;
     
-    const string pk(/*Get*/currPK/*()*/);
-    currQuery = ("UPDATE pets SET " + col + "='" + val + "' WHERE " + pk + "=" + currId + ";");
+    currQuery = ("UPDATE pets SET " + col + "='" + val + "' WHERE " + currPK + "=" + currId + ";");
     return currQuery;
 }
 
@@ -404,9 +404,9 @@ string& PetBook::AddEntry()
     {
         currQuery += (", " + m_fields->getString("COLUMN_NAME"));
     }
+    currQuery += ") VALUES (";
 
     // add values from input to statement string
-    currQuery += ") VALUES (";
     m_fields->first();
     m_fields->next();    // skip pk column
     cout << m_fields->getString("COLUMN_NAME") << ": " << flush;
@@ -430,26 +430,24 @@ string& PetBook::RemoveEntry()
     cout << "choose an entry and enter its pet_id" << endl;
     cin >> currId;
     
-    const string pk(/*Get*/currPK/*()*/);
-    currQuery = ("DELETE FROM " + currTable + " WHERE " + pk + "=" + currId + ";");
+    // const string pk(currPK);
+    currQuery = ("DELETE FROM " + currTable + " WHERE " + currPK + "=" + currId + ";");
     return currQuery;
 }
 
 // helper operations
-string& PetBook::FindByCurrId() // TO DO: make pk a member, changig automatically when setting a table
+string& PetBook::FindByCurrId()
 {
-    const string pk(/*Get*/currPK/*()*/);
     const string select(SelectDataWhere());
-    const string rule(GetRule(pk, currId, ""));
+    const string rule(GetRule(currPK, currId, ""));
     stmtString = (select + rule);
     return stmtString;
 }
 
-string& PetBook::FindByMaxId()  // TO DO: same.
+string& PetBook::FindByMaxId()
 {
     const string select(SelectDataWhere());
-    const string pk(/*Get*/currPK/*()*/);
-    stmtString = (select + pk + " = (SELECT MAX(" + pk + ") FROM pets)");
+    stmtString = (select + currPK + " = (SELECT MAX(" + currPK + ") FROM pets)");
     return stmtString; 
 }
 
@@ -485,6 +483,45 @@ string& PetBook::GetRule(const string& col, const string& val, const string& val
     return stmtString;
 }
 
+void PetBook::SetCurrPK()
+{
+    try
+    {
+        PreparedStatement* pstmt = con->prepareStatement(
+            "SHOW KEYS FROM " + currTable + " WHERE Key_name = 'PRIMARY';");
+        ResultSet* res = pstmt->executeQuery();
+        res->next();
+        currPK = (res->getString("COLUMN_NAME"));
+
+        delete res;
+        delete pstmt;
+    }
+    catch (sql::SQLException &e)
+    {
+        cout << "# ERR: " << e.what() << endl;
+    }
+}
+
+string& PetBook::SelectData()
+{
+    stmtString = ("SELECT * FROM " + currTable);
+    return stmtString;
+}
+
+string& PetBook::SelectDataWhere()
+{
+    SelectData();
+    stmtString += " WHERE ";
+    return stmtString;
+}
+
+string& PetBook::SelectDataAsc()
+{
+    SelectData();
+    stmtString += (" ORDER BY " + currPK + " ASC");
+    return stmtString;
+}
+
 static bool isNum(const string& val)
 {
     char* isText;
@@ -505,48 +542,6 @@ static void GetSearchVals(string& val, string& val2)
         cin >> val;
         cin >> val2;
     }
-}
-
-void PetBook::SetCurrPK()
-// string& PetBook::GetCurrPK()
-{
-    try
-    {
-        PreparedStatement* pstmt = con->prepareStatement(
-            "SHOW KEYS FROM " + currTable + " WHERE Key_name = 'PRIMARY';");
-        ResultSet* res = pstmt->executeQuery();
-        res->next();
-        currPK = (res->getString("COLUMN_NAME"));
-
-        delete res;
-        delete pstmt;
-    }
-    catch (sql::SQLException &e)
-    {
-        cout << "# ERR: " << e.what() << endl;
-    }
-
-    // return stmtString;
-}
-
-string& PetBook::SelectData()
-{
-    stmtString = ("SELECT * FROM " + currTable);
-    return stmtString;
-}
-
-string& PetBook::SelectDataWhere()
-{
-    SelectData();
-    stmtString += " WHERE ";
-    return stmtString;
-}
-
-string& PetBook::SelectDataAsc()
-{
-    SelectData();
-    stmtString += (" ORDER BY " + /*Get*/currPK/*()*/ + " ASC");
-    return stmtString;
 }
 
 } // namespace ashs
