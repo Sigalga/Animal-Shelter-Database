@@ -27,16 +27,10 @@ public:
     ~PetBook() { delete m_fields; }
 
     void SetDatabase(const string& db) { petBookDB = db; }
-    void SetDataTable(const string& table)
-    {
-        currTable = table;
-        m_fields = GetFields();
-        // currPK = GetcurrPK();
-        SetCurrPK();;
-    }
-    // string& GetCurrPK();
+    void SetDataTable(const string& table);
     void SetCurrPK();
 
+    void DisplayTableMenu();
 
     void Start();
     void Stop() { isRunning = false; }
@@ -46,12 +40,12 @@ private:
     StmtStringGenerator* stringGen;
     string petBookDB;
     bool isRunning;
-    string currTable;   // for datatable choice
-    string currPK;      // for datatable choice
-    string currId;      // for update operations, otherwise "query" or empty
-    string currQuery;   // for secondary operations concatenation
-    string stmtString;  // for stringFuncs
-    ResultSet* m_fields;// datatable fields
+    string currTable;       // for datatable choice
+    string currPK;          // for datatable choice
+    string currId;          // for update operations, otherwise "query" or empty
+    string currQuery;       // for secondary operations concatenation
+    string stmtString;      // for stringFuncs
+    ResultSet* m_fields;    // datatable fields
 
     // Main flow functions /////////////////////////////////////////////////////
     // Adds all the StringFuncs to the String Generator
@@ -64,6 +58,9 @@ private:
     string& MakeString();
 
     // Menu Displayers /////////////////////////////////////////////////////////
+    // Displays a list of datatables and enables to choose one
+    // void DisplayTableMenu();###################
+
     // Displays a list of all operations possible via ui
     void DisplayOperMenu();
 
@@ -103,7 +100,7 @@ private:
     // clear the search when done, modified item is displayed
     string& UpdateField();
     string& AddEntry();
-    string& RemoveEntry(); // TO DO
+    string& RemoveEntry();
 
     // helper operations
     string& FindByCurrId();

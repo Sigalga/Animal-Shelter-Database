@@ -90,5 +90,5 @@ static void GetAllTest()
 {
 	StmtStringGenerator strGen;
     PetBook petBook(g_con, &strGen);
-    // cout << petBook.ExecuteInput() << endl;
+	petBook.DisplayTableMenu();
 }
