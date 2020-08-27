@@ -25,25 +25,27 @@ namespace ashs
 static bool isNum(const string& val);
 static void GetSearchVals(string& val, string& val2);
 
-// statement strings
+// constants
 static const string PET_BOOK_DB("pet_book");
 static const string DATA_TABLES[] = { "pets", "adopters" };
 static const string DEF_TABLE(DATA_TABLES[0]);
-
-// other consts
+static const string FK("adopter_id");
 static const string WELCOME_MSG("\nWelcome to the PetBook");
 
 static const PetBook::Key OPER_NAMES[] =
 {
-    "exit",         // 0 initial  secondary
-    "show_all",     // 1 initial
-    "find",         // 2 initial
-    "update",       // 3 initial  secondary
-    "add_new",      // 4 initial  secondary
-    "delete",       // 5 initial  secondary
-    "filter",       // 6          secondary
-    "order",        // 7          secondary
-    "clear"         // 8 initial  secondary
+    "exit",         // 0  initial  secondary
+    "show_all",     // 1  initial
+    "find",         // 2  initial
+    "update",       // 3  initial  secondary
+    "add_new",      // 4  initial  secondary
+    "delete",       // 5  initial  secondary
+    "filter",       // 6           secondary
+    "order",        // 7           secondary
+    "clear",        // 8  initial  secondary
+    "choose",       // 9  initial  secondary
+    "find_id",      // 10
+    "find_joined"   // 11
 };
 
 static const PetBook::Key INIT_OPER_NAMES[] =
@@ -53,6 +55,7 @@ static const PetBook::Key INIT_OPER_NAMES[] =
     OPER_NAMES[3],
     OPER_NAMES[4],
     OPER_NAMES[5],
+    OPER_NAMES[9],
     OPER_NAMES[8],  // clear
     OPER_NAMES[0]   // exit
 };
@@ -64,9 +67,19 @@ static const PetBook::Key SEC_OPER_NAMES[] =
     OPER_NAMES[5],
     OPER_NAMES[6],
     OPER_NAMES[7],
+    OPER_NAMES[9],
     OPER_NAMES[8],  // clear
     OPER_NAMES[0]   // exit
 };
+
+static const PetBook::Key CHOOSE_OPER_NAMES[]=
+{
+    OPER_NAMES[10], // 0 find_id
+    OPER_NAMES[11], // 1 find_joined
+    OPER_NAMES[3],  // 2 update
+    OPER_NAMES[5]   // 3 delete
+};
+
 static const size_t N_TABLES = (sizeof(DATA_TABLES) / sizeof(string));
 static const size_t N_OPERS = sizeof(OPER_NAMES) / sizeof(PetBook::Key);
 static const size_t N_INIT_OPERS = sizeof(INIT_OPER_NAMES) / sizeof(PetBook::Key);
@@ -104,7 +117,10 @@ void PetBook::InitStringGen()
         boost::bind(&PetBook::RemoveEntry,  this),
         boost::bind(&PetBook::FilterBy,     this),
         boost::bind(&PetBook::OrderBy,      this),
-        boost::bind(&PetBook::ClearSearch,  this)
+        boost::bind(&PetBook::ClearSearch,  this),
+        boost::bind(&PetBook::ChooseEntry,  this),
+        boost::bind(&PetBook::FindByCurrId, this),
+        boost::bind(&PetBook::FindJoined,   this)
     };
 
     // Add operations
@@ -131,6 +147,7 @@ void PetBook::ExecuteInput()
         {
             try
             {
+                cout << currQuery << endl;
                 PreparedStatement* pstmt = con->prepareStatement(currQuery);
                 DisplayResults(pstmt->executeQuery());
 
@@ -148,9 +165,9 @@ void PetBook::ExecuteInput()
 
 string& PetBook::MakeString()
 {
+    // choose table
     if (0 == currId.compare("")) // new search
     {
-        // choose table
         DisplayTableMenu();
         size_t i;
         cin >> i;
@@ -284,6 +301,7 @@ void PetBook::DisplayFieldMenu()
     cout << "Enter the parameter to search by or modify. options are:" << endl;
 
     m_fields->first();
+    cout << "- " << m_fields->getString("COLUMN_NAME") << endl;
     while (m_fields->next())
     {
         cout << "- " << m_fields->getString("COLUMN_NAME") << endl;
@@ -389,12 +407,51 @@ string& PetBook::OrderBy()
     return currQuery;
 }
 
+// join queries
+string& PetBook::FindJoined()
+{
+    // choose a single entry, if not chosen
+    if (0 != currQuery.compare("choose"))
+    {
+        SetCurrId();
+    }
+
+    // extract the foreign key value of the chosen entry
+    string foreignKey = GetCurrFKVal();
+    cout << foreignKey;
+
+    // identify as a query for result display
+    currId = "query";
+
+    // choose an adopter's adopter_id and showing all its pets
+    if (0 == currTable.compare("adopters"))
+    {
+        SetDataTable("pets");
+        currQuery = "SELECT * FROM pets WHERE " + FK + "=" + foreignKey;
+    }
+    // choose a pet's adopter_id and showing that adopter
+    else if (0 == currTable.compare("pets"))
+    {
+        SetDataTable("adopters");
+        currQuery = "SELECT * FROM adopters WHERE " + FK + "=" + foreignKey;
+    }
+    // default option
+    else
+    {
+        currQuery = "";
+    }
+
+    return currQuery;
+}
+
 // editorial operations
 string& PetBook::UpdateField()
 {
-    // choose a single entry
-    cout << "choose an entry and enter its pet_id" << endl;
-    cin >> currId;
+    // choose a single entry, if not chosen
+    if (0 != currQuery.compare("choose"))
+    {
+        SetCurrId();
+    }
 
     // enter column to update
     DisplayFieldMenu();
@@ -447,13 +504,42 @@ string& PetBook::AddEntry()
 
 string& PetBook::RemoveEntry()
 {
-    // choose a single entry
-    cout << "choose an entry and enter its pet_id" << endl;
-    cin >> currId;
+    // choose a single entry, if not chosen
+    if (0 != currQuery.compare("choose"))
+    {
+        SetCurrId();
+    }
     
     // const string pk(currPK);
     currQuery = ("DELETE FROM " + currTable + " WHERE " + currPK + "=" + currId + ";");
     return currQuery;
+}
+
+string& PetBook::ChooseEntry()
+{
+    // choose a single entry and notify future calls
+    SetCurrId();
+    currQuery = "choose";
+
+    cout << "choose an operation: (type the number)\n"
+    << "1. display entry\n"
+    << "2. display owner / owned pets\n"
+    << "3. update entry\n"
+    << "4. remove entry"
+    << endl;
+
+    size_t key = 0;
+    cin >> key;
+
+    currQuery = stringGen->GenerateString(CHOOSE_OPER_NAMES[key - 1]);
+    return currQuery;
+}
+
+void PetBook::SetCurrId()
+{
+    // choose a single entry
+    cout << "choose an entry and enter its " << currPK << endl;
+    cin >> currId;
 }
 
 // helper operations
@@ -571,6 +657,27 @@ void PetBook::SetCurrPK()
     {
         cout << "# ERR: " << e.what() << endl;
     }
+}
+
+string& PetBook::GetCurrFKVal()
+{
+    try
+    {
+        PreparedStatement* pstmt = con->prepareStatement(
+            "SELECT " + FK + " FROM " + currTable + " WHERE " + currPK + "=" + currId);
+        ResultSet* res = pstmt->executeQuery();
+        res->next();
+        stmtString = (res->getString(FK));
+
+        delete res;
+        delete pstmt;
+    }
+    catch (sql::SQLException &e)
+    {
+        cout << "# ERR: " << e.what() << endl;
+    }
+
+    return stmtString;
 }
 
 } // namespace ashs

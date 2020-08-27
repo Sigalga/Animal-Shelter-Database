@@ -6,7 +6,7 @@
 
 // MySQL/C++ Connector includes
 #include <cppconn/connection.h>     // sql::Connection
-#include <cppconn/resultset.h>		    // sql::ResultSet
+#include <cppconn/resultset.h>		// sql::ResultSet
 
 // ASHS includes
 #include "stmt_string_generator.hpp"
@@ -29,8 +29,6 @@ public:
     void SetDatabase(const string& db) { petBookDB = db; }
     void SetDataTable(const string& table);
     void SetCurrPK();
-
-    void DisplayTableMenu();
 
     void Start();
     void Stop() { isRunning = false; }
@@ -59,7 +57,7 @@ private:
 
     // Menu Displayers /////////////////////////////////////////////////////////
     // Displays a list of datatables and enables to choose one
-    // void DisplayTableMenu();###################
+    void DisplayTableMenu();
 
     // Displays a list of all operations possible via ui
     void DisplayOperMenu();
@@ -78,40 +76,143 @@ private:
     ResultSet* GetEditResult();
 
     // Prints a Resultset in a table view by <fields>
-    // void PrintTable(ResultSet* res, ResultSet* fields);
     void PrintTable(ResultSet* res);
 
     // StringFuncs /////////////////////////////////////////////////////////////
-    string& Exit();
-
-    // forget all initial/concatenated queries
+    // Exists PetBook
+    string& Exit();             
+    
+    // Starts a new search in the database
     string& ClearSearch();
-
-    // initial queries
+    
+    // Initial queries ///////////////////////////////////////
+    //
+    // Searches table by a field and a value, or a range of values
     string& FindBy();
+    //
+    // Fetches all table entries in an ascending pk order
     string& GetAll();
+    //
+    //////////////////////////////////////////////////////////
 
-    // secondary queries
-    // may be concatenated to initial/secondary queries
+    // Secondary queries /////////////////////////////////////
+    // May be concatenated to initial/secondary queries
+    //
+    // Filters an existing serach result set by a field and a value,
+    // or a range of values
     string& FilterBy();
+    //
+    // Oraders an existing serach result set by a field's value,
+    // either in an ascending or descending order
     string& OrderBy();
+    //
+    string& ChooseEntry();
+    //
+    //////////////////////////////////////////////////////////
 
-    // editorial operations
-    // clear the search when done, modified item is displayed
+    // pick an adopter to see all of its pets
+    // or: pick a pet to see its adopter
+    string& FindJoined();
+
+    // Editorial operations //////////////////////////////////
+    // Clear the search when done, and display modified item
+    //
+    // Replaces current field value with a new input value
     string& UpdateField();
+    //
+    // Adds a new table entry with input values
     string& AddEntry();
+    //
+    // Removes a table entry by its identifier
     string& RemoveEntry();
+    //
+    //////////////////////////////////////////////////////////
 
-    // helper operations
+    // Helper operations /////////////////////////////////////
+    //
+    // Rereives the entry most recently edited by PetBook
     string& FindByCurrId();
+    //
+    // Rereives the entry most recently added to the table
     string& FindByMaxId();
-
+    //
+    // A query start phrase, retreives all table data
     string& SelectData();
+    //
+    // A query start phrase, to be followed by a rule
     string& SelectDataWhere();
+    //
+    // A query start phrase, retreives all table data
+    // ordered by its pk in an ascending order
     string& SelectDataAsc();
+    //
+    // A rule phrase for a query, to follow a start phrase
     string& GetRule(const string& col, const string& val, const string& val2);
+    //
+    // Sets currId to a user input
+    void SetCurrId();
+    //
+    // Gets the foreign key value of an entry identified by currId
+    string& GetCurrFKVal();
+    //
+    //////////////////////////////////////////////////////////
+
+    friend class TestClass;
 };
 
+class TestClass
+{
+public:
+    TestClass(PetBook* petBook)
+        : instance(petBook), errors(0)
+    {}
+
+    void ExecutInputTest()
+    {
+        instance->isRunning = true;
+        instance->ExecuteInput();
+    }
+
+    void MakeStringTest()
+    {
+        cout << instance->MakeString();
+    }
+    
+    void StringFuncsTest()
+    {
+        cout << "-- StringFuncsTest --\n";
+
+        cout << "\nFindByCurrId()";
+        instance->currId = "2";
+        if ("SELECT * FROM pets WHERE pet_id=2" != instance->FindByCurrId())
+        {
+            cout << "\terror";
+            ++errors;
+        }
+
+        cout << "\nFindByMaxId()";
+        if ("SELECT * FROM pets WHERE pet_id = (SELECT MAX(pet_id) FROM pets)" !=
+                instance->FindByMaxId())
+        {
+            cout << "\terror";
+            ++errors;
+        }
+
+        cout << "\nFindJoined()";
+        cout << instance->FindJoined();
+        // if ( != instance->FindJoined())
+        // {
+        //     cout << "\terror";
+        //     ++errors;
+        // }
+
+        cout << "\ndetected " << errors << " errors" << endl;
+    }
+
+private:
+    PetBook* instance;
+    size_t errors;
+};
 
 } // namespace ashs
 

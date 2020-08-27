@@ -20,7 +20,7 @@ static void AtExit();
 static void InitTest();
 static void StartTest();
 static void GetPKTest();
-static void GetAllTest();
+static void PrivateMethodsTest();
 
 // server data
 static const string URL = "tcp://127.0.0.1:3306";
@@ -35,9 +35,9 @@ int main()
 	ConnectToSQL();
 	
 	// InitTest();
-	StartTest();
+	// StartTest();
 	// GetPKTest();
-	// GetAllTest();
+	PrivateMethodsTest();
 
 	AtExit();
 
@@ -86,9 +86,13 @@ static void GetPKTest()
     // cout << petBook.GetCurrPK() << endl;
 }
 
-static void GetAllTest()
+static void PrivateMethodsTest()
 {
 	StmtStringGenerator strGen;
     PetBook petBook(g_con, &strGen);
-	petBook.DisplayTableMenu();
+	TestClass test(&petBook);
+	
+	test.ExecutInputTest();
+	// test.MakeStringTest();
+	// test.StringFuncsTest();
 }
