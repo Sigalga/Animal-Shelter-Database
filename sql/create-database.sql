@@ -13,4 +13,12 @@ CREATE TABLE `pets` (
 
 ALTER TABLE `pets` AUTO_INCREMENT=1;
 
+# inserting new entries
 INSERT INTO `pets` VALUES (1,NULL,'Dummy',0,'in shelter');
+
+# fixing autoincrement id column
+SET @m = (SELECT MAX(pet_id) + 1 FROM pets); 
+SET @s = CONCAT('ALTER TABLE pets AUTO_INCREMENT=', @m);
+PREPARE stmt1 FROM @s;
+EXECUTE stmt1;
+DEALLOCATE PREPARE stmt1;
