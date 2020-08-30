@@ -23,6 +23,7 @@ namespace ashs
 
 // helper funcs
 static bool isNum(const string& val);
+static bool isNull(const string& val);
 static void GetSearchVals(string& val, string& val2);
 
 // constants
@@ -102,7 +103,6 @@ PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
 	con->setSchema(petBookDB);
     SetCurrPK();
     InitStringGen();
-    cout << currTable << endl;
 }
 
 void PetBook::InitStringGen()
@@ -147,7 +147,6 @@ void PetBook::ExecuteInput()
         {
             try
             {
-                cout << currQuery << endl;
                 PreparedStatement* pstmt = con->prepareStatement(currQuery);
                 DisplayResults(pstmt->executeQuery());
 
@@ -470,6 +469,7 @@ string& PetBook::UpdateField()
 string& PetBook::AddEntry()
 {
     currId = "new_id";
+    ResetAutoinc();
 
     cout << "Enter the values for each parameter:" << endl;
 
@@ -490,12 +490,29 @@ string& PetBook::AddEntry()
     cout << m_fields->getString("COLUMN_NAME") << ": " << flush;
     string val("");
     cin >> val;
-    currQuery += (isNum(val) ? val : ("'" + val + "'"));
+
+    if (isNum(val))
+    {
+        currQuery += (isNull(val) ? "NULL" : val);
+    }
+    else
+    {
+        currQuery += ("'" + val + "'");
+    }
     while (m_fields->next())
     {
         cout << m_fields->getString("COLUMN_NAME") << ": " << flush;
         cin >> val;
-        currQuery += (", " + (isNum(val) ? val : ("'" + val + "'")));
+        currQuery += (", ");
+
+        if (isNum(val))
+        {
+            currQuery += (isNull(val) ? "NULL" : val);
+        }
+        else
+        {
+            currQuery += ("'" + val + "'");
+        }
     }
     currQuery += ")";
 
@@ -510,7 +527,6 @@ string& PetBook::RemoveEntry()
         SetCurrId();
     }
     
-    // const string pk(currPK);
     currQuery = ("DELETE FROM " + currTable + " WHERE " + currPK + "=" + currId + ";");
     return currQuery;
 }
@@ -618,6 +634,11 @@ static bool isNum(const string& val)
     return false == *isText;
 }
 
+static bool isNull(const string& val)
+{
+    return 0 == string("0").compare(val);
+}
+
 static void GetSearchVals(string& val, string& val2)
 {
     cout << "Enter a value for the parameter.\n"
@@ -679,5 +700,30 @@ string& PetBook::GetCurrFKVal()
 
     return stmtString;
 }
+
+void PetBook::ResetAutoinc()
+{
+    try
+    {
+        string stmtStr("SELECT " + currPK + " FROM " + currTable + " WHERE " + currPK + " = (SELECT MAX(" + currPK + ") FROM " + currTable + ")");
+        PreparedStatement* pstmt = con->prepareStatement(stmtStr);
+        ResultSet* res = pstmt->executeQuery();
+
+        res->first();
+        string maxId = res->getString(currPK);
+
+        stmtStr = ("ALTER TABLE pets AUTO_INCREMENT=" + maxId + ";");
+        pstmt = con->prepareStatement(stmtStr);
+        res = pstmt->executeQuery();
+
+        delete res;
+        delete pstmt;
+    }
+    catch (sql::SQLException &e)
+    {
+        cout << "# ERR: " << e.what() << endl;
+    }
+}
+
 
 } // namespace ashs

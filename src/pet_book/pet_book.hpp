@@ -29,6 +29,7 @@ public:
     void SetDatabase(const string& db) { petBookDB = db; }
     void SetDataTable(const string& table);
     void SetCurrPK();
+    void ResetAutoinc();
 
     void Start();
     void Stop() { isRunning = false; }
@@ -157,61 +158,7 @@ private:
     //
     //////////////////////////////////////////////////////////
 
-    friend class TestClass;
-};
-
-class TestClass
-{
-public:
-    TestClass(PetBook* petBook)
-        : instance(petBook), errors(0)
-    {}
-
-    void ExecutInputTest()
-    {
-        instance->isRunning = true;
-        instance->ExecuteInput();
-    }
-
-    void MakeStringTest()
-    {
-        cout << instance->MakeString();
-    }
-    
-    void StringFuncsTest()
-    {
-        cout << "-- StringFuncsTest --\n";
-
-        cout << "\nFindByCurrId()";
-        instance->currId = "2";
-        if ("SELECT * FROM pets WHERE pet_id=2" != instance->FindByCurrId())
-        {
-            cout << "\terror";
-            ++errors;
-        }
-
-        cout << "\nFindByMaxId()";
-        if ("SELECT * FROM pets WHERE pet_id = (SELECT MAX(pet_id) FROM pets)" !=
-                instance->FindByMaxId())
-        {
-            cout << "\terror";
-            ++errors;
-        }
-
-        cout << "\nFindJoined()";
-        cout << instance->FindJoined();
-        // if ( != instance->FindJoined())
-        // {
-        //     cout << "\terror";
-        //     ++errors;
-        // }
-
-        cout << "\ndetected " << errors << " errors" << endl;
-    }
-
-private:
-    PetBook* instance;
-    size_t errors;
+    friend class PbTestClass;
 };
 
 } // namespace ashs

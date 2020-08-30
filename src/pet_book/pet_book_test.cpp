@@ -1,12 +1,13 @@
 // Standard C++ includes
 #include <string>
 #include <iostream>
+#include <fstream>
 
 // MySQL/C++ Connector includes
 #include "mysql_driver.h"			// sql::mysql::MySQL_Driver
 #include <cppconn/connection.h>     // sql::Connection
 
-#include "pet_book.hpp"
+#include "pb_test_class.hpp"
 
 using namespace sql;
 using namespace std;
@@ -19,7 +20,6 @@ static void AtExit();
 // Test functions
 static void InitTest();
 static void StartTest();
-static void GetPKTest();
 static void PrivateMethodsTest();
 
 // server data
@@ -34,9 +34,8 @@ int main()
 {
 	ConnectToSQL();
 	
-	// InitTest();
-	// StartTest();
-	// GetPKTest();
+	InitTest();
+	StartTest();
 	PrivateMethodsTest();
 
 	AtExit();
@@ -61,38 +60,103 @@ static void AtExit()
 
 static void InitTest()
 {
+    cout << "\n-- InitTest(): ";
 	size_t errors = 0, passes = 0;
 
 	StmtStringGenerator strGen;
     PetBook petBook(g_con, &strGen);
 
 	// print report
-    cout << "AddStringFunc Test: "
-    << passes << " successful. "
+    cout << passes << " successful. "
     << errors << " errors." << endl;
 }
 
 static void StartTest()
 {
+    cout << "\n-- StartTest(): ";
+	size_t errors = 0, passes = 0;
+
+	// redirect io to file stream
+	ifstream in("in.txt");
+    streambuf *cinbuf = cin.rdbuf();
+    cin.rdbuf(in.rdbuf());
+
+	ofstream out("out.txt");
+    streambuf *coutbuf = cout.rdbuf();
+    cout.rdbuf(out.rdbuf());
+
 	StmtStringGenerator strGen;
     PetBook petBook(g_con, &strGen);
     petBook.Start();
-}
 
-static void GetPKTest()
-{
-	StmtStringGenerator strGen;
-    PetBook petBook(g_con, &strGen);
-    // cout << petBook.GetCurrPK() << endl;
+	// reset to standard io again
+	// cin.rdbuf(cinbuf);
+    cout.rdbuf(coutbuf);
+
+	// print report
+    cout << passes << " successful. "
+    << errors << " errors." << endl;
 }
 
 static void PrivateMethodsTest()
 {
+    cout << "\n-- PrivateMethodsTest():" << endl;
+	size_t errors = 0, passes = 0;
+
+	// redirect io to file stream
+	ifstream in("in.txt");
+    streambuf *cinbuf = cin.rdbuf();
+    cin.rdbuf(in.rdbuf());
+	ofstream out("out.txt");
+    streambuf *coutbuf = cout.rdbuf();
+    cout.rdbuf(out.rdbuf());
+
 	StmtStringGenerator strGen;
     PetBook petBook(g_con, &strGen);
-	TestClass test(&petBook);
+	PbTestClass test(&petBook);
 	
 	test.ExecutInputTest();
-	// test.MakeStringTest();
-	// test.StringFuncsTest();
+	test.MakeStringTest();
+	errors += test.StringFuncsTest();
+
+	// reset to standard io again
+	// cin.rdbuf(cinbuf);
+    cout.rdbuf(coutbuf);
+	cout << "---- StringFuncsTest(): "
+	<< errors << " errors." << endl;
+
 }
+
+
+
+// void f()
+// {
+//     std::string line;
+//     while(std::getline(std::cin, line))  //input from the file in.txt
+//     {
+//         std::cout << line << "\n";   //output to the file out.txt
+//     }
+// }
+// int main()
+// {
+//     std::ifstream in("in.txt");
+//     std::streambuf *cinbuf = std::cin.rdbuf(); //save old buf
+//     std::cin.rdbuf(in.rdbuf()); //redirect std::cin to in.txt!
+
+//     std::ofstream out("out.txt");
+//     std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
+//     std::cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
+
+//     std::string word;
+//     std::cin >> word;           //input from the file in.txt
+//     std::cout << word << "  ";  //output to the file out.txt
+
+//     f(); //call function
+
+
+//     std::cin.rdbuf(cinbuf);   //reset to standard input again
+//     std::cout.rdbuf(coutbuf); //reset to standard output again
+
+//     std::cin >> word;   //input from the standard input
+//     std::cout << word;  //output to the standard input
+// }

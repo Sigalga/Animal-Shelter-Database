@@ -1,0 +1,18 @@
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
