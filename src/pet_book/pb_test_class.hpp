@@ -17,6 +17,13 @@ public:
 
 private:
     PetBook* instance;
+
+    // stringFuncs
+    size_t FindByCurrIdTest();
+    size_t FindByMaxIdTest();
+    size_t GetAllTest();
+    size_t FindByTest();
+    size_t FilterByTest();
 };
 
 } // namespace ashs

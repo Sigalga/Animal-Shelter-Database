@@ -725,5 +725,4 @@ void PetBook::ResetAutoinc()
     }
 }
 
-
 } // namespace ashs

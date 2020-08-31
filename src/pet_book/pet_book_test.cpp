@@ -30,6 +30,11 @@ static const string PASS = "root";
 static mysql::MySQL_Driver* g_driver = NULL;
 static Connection* g_con = NULL;
 
+ifstream in("in.txt");
+ofstream out("out.txt");
+streambuf *cinbuf = cin.rdbuf();
+streambuf *coutbuf = cout.rdbuf();
+
 int main()
 {
 	ConnectToSQL();
@@ -77,12 +82,7 @@ static void StartTest()
 	size_t errors = 0, passes = 0;
 
 	// redirect io to file stream
-	ifstream in("in.txt");
-    streambuf *cinbuf = cin.rdbuf();
     cin.rdbuf(in.rdbuf());
-
-	ofstream out("out.txt");
-    streambuf *coutbuf = cout.rdbuf();
     cout.rdbuf(out.rdbuf());
 
 	StmtStringGenerator strGen;
@@ -90,7 +90,7 @@ static void StartTest()
     petBook.Start();
 
 	// reset to standard io again
-	// cin.rdbuf(cinbuf);
+	cin.rdbuf(cinbuf);
     cout.rdbuf(coutbuf);
 
 	// print report
@@ -103,60 +103,31 @@ static void PrivateMethodsTest()
     cout << "\n-- PrivateMethodsTest():" << endl;
 	size_t errors = 0, passes = 0;
 
-	// redirect io to file stream
-	ifstream in("in.txt");
-    streambuf *cinbuf = cin.rdbuf();
-    cin.rdbuf(in.rdbuf());
-	ofstream out("out.txt");
-    streambuf *coutbuf = cout.rdbuf();
-    cout.rdbuf(out.rdbuf());
-
 	StmtStringGenerator strGen;
     PetBook petBook(g_con, &strGen);
 	PbTestClass test(&petBook);
-	
+
+	cout << "---- ExecutInputTest(): " << endl;
+	// redirect io to file stream
+    cin.rdbuf(in.rdbuf());
+    cout.rdbuf(out.rdbuf());
 	test.ExecutInputTest();
+	// reset to standard io again
+	cin.rdbuf(cinbuf);
+    cout.rdbuf(coutbuf);
+
+	cout << "---- MakeStringTest(): " << endl;
+	// redirect io to file stream
+    cin.rdbuf(in.rdbuf());
+    cout.rdbuf(out.rdbuf());
 	test.MakeStringTest();
+	// reset to standard io again
+	cin.rdbuf(cinbuf);
+    cout.rdbuf(coutbuf);
+
+	cout << "---- StringFuncsTest(): " << endl;
 	errors += test.StringFuncsTest();
 
-	// reset to standard io again
-	// cin.rdbuf(cinbuf);
-    cout.rdbuf(coutbuf);
-	cout << "---- StringFuncsTest(): "
-	<< errors << " errors." << endl;
+	cout << "---- " << errors << " errors." << endl;
 
 }
-
-
-
-// void f()
-// {
-//     std::string line;
-//     while(std::getline(std::cin, line))  //input from the file in.txt
-//     {
-//         std::cout << line << "\n";   //output to the file out.txt
-//     }
-// }
-// int main()
-// {
-//     std::ifstream in("in.txt");
-//     std::streambuf *cinbuf = std::cin.rdbuf(); //save old buf
-//     std::cin.rdbuf(in.rdbuf()); //redirect std::cin to in.txt!
-
-//     std::ofstream out("out.txt");
-//     std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
-//     std::cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
-
-//     std::string word;
-//     std::cin >> word;           //input from the file in.txt
-//     std::cout << word << "  ";  //output to the file out.txt
-
-//     f(); //call function
-
-
-//     std::cin.rdbuf(cinbuf);   //reset to standard input again
-//     std::cout.rdbuf(coutbuf); //reset to standard output again
-
-//     std::cin >> word;   //input from the standard input
-//     std::cout << word;  //output to the standard input
-// }
