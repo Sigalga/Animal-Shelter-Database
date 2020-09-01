@@ -325,6 +325,13 @@ string& PetBook::Exit()
     return stmtString;
 }
 
+string& PetBook::ClearSearch()
+{
+    currId = "";
+    currQuery = "";
+    return currQuery;
+}
+
 // initial queries
 string& PetBook::FindBy()
 {
@@ -406,7 +413,26 @@ string& PetBook::OrderBy()
     return currQuery;
 }
 
-// join queries
+string& PetBook::ChooseEntry()
+{
+    // choose a single entry and notify future calls
+    SetCurrId();
+    currQuery = "choose";
+
+    cout << "choose an operation: (type the number)\n"
+    << "1. display entry\n"
+    << "2. display owner / owned pets\n"
+    << "3. update entry\n"
+    << "4. remove entry"
+    << endl;
+
+    size_t key = 0;
+    cin >> key;
+
+    currQuery = stringGen->GenerateString(CHOOSE_OPER_NAMES[key - 1]);
+    return currQuery;
+}
+
 string& PetBook::FindJoined()
 {
     // choose a single entry, if not chosen
@@ -417,7 +443,6 @@ string& PetBook::FindJoined()
 
     // extract the foreign key value of the chosen entry
     string foreignKey = GetCurrFKVal();
-    cout << foreignKey;
 
     // identify as a query for result display
     currId = "query";
@@ -531,26 +556,6 @@ string& PetBook::RemoveEntry()
     return currQuery;
 }
 
-string& PetBook::ChooseEntry()
-{
-    // choose a single entry and notify future calls
-    SetCurrId();
-    currQuery = "choose";
-
-    cout << "choose an operation: (type the number)\n"
-    << "1. display entry\n"
-    << "2. display owner / owned pets\n"
-    << "3. update entry\n"
-    << "4. remove entry"
-    << endl;
-
-    size_t key = 0;
-    cin >> key;
-
-    currQuery = stringGen->GenerateString(CHOOSE_OPER_NAMES[key - 1]);
-    return currQuery;
-}
-
 void PetBook::SetCurrId()
 {
     // choose a single entry
@@ -572,13 +577,6 @@ string& PetBook::FindByMaxId()
     const string select(SelectDataWhere());
     stmtString = (select + currPK + " = (SELECT MAX(" + currPK + ") FROM " + currTable + ")");
     return stmtString; 
-}
-
-string& PetBook::ClearSearch()
-{
-    currId = "";
-    currQuery = "";
-    return currQuery;
 }
 
 // Helper functions ////////////////////////////////////////////////////////

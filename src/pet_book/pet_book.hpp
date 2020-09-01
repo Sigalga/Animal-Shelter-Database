@@ -109,11 +109,11 @@ private:
     //
     string& ChooseEntry();
     //
-    //////////////////////////////////////////////////////////
-
-    // pick an adopter to see all of its pets
-    // or: pick a pet to see its adopter
+    // Receives an adopter id to show all of its pets
+    // or: a pet id to show its adopter
     string& FindJoined();
+    //
+    //////////////////////////////////////////////////////////
 
     // Editorial operations //////////////////////////////////
     // Clear the search when done, and display modified item

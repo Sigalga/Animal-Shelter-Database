@@ -1,0 +1,2 @@
+choose an entry and enter its adopter_id
+# ERR: Unknown column 'choose' in 'where clause'

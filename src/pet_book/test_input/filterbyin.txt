@@ -2,3 +2,7 @@ name
 Luna
 age_months
 20
+status
+adopted
+name
+Luna

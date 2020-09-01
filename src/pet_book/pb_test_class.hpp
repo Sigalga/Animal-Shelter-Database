@@ -18,12 +18,38 @@ public:
 private:
     PetBook* instance;
 
-    // stringFuncs
+    // StringFuncs //////////////
+    size_t ExitTest();
+    size_t ClearSearchTest();
+
+    // Initial queries
+    size_t FindByTest();
+    size_t GetAllTest();
+
+    // Secondary queries
+    size_t FilterByTest();
+    size_t OrderByTest();
+    size_t ChooseEntryTest();
+    size_t FindJoinedTest();
+
+    // Editorial operations
+    size_t UpdateFieldTest();
+    size_t AddEntryTest();
+    size_t RemoveEntryTest();
+
+    // Helper operations
     size_t FindByCurrIdTest();
     size_t FindByMaxIdTest();
-    size_t GetAllTest();
-    size_t FindByTest();
-    size_t FilterByTest();
+    size_t SelectDataTest();
+    size_t SelectDataWhereTest();
+    size_t SelectDataAscTest();
+    size_t GetRuleTest();
+
+
+
+
+
+
 };
 
 } // namespace ashs
