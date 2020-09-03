@@ -90,6 +90,16 @@ const string chooseQueries[] =
     // input: 2 4
     "DELETE FROM pets WHERE pet_id=2;"
 };
+
+const size_t N_GETRULE_TESTS = 5;
+const string getRuleParams[N_GETRULE_TESTS][4] =
+{
+    { "number", "2", "", "number=2" },
+    { "number", "2", "3", "number BETWEEN 2 AND 3" },
+    { "text", "hello", "", "text LIKE '%hello%'" },
+    { "text", "hello", "world", "text LIKE '%hello%'" },
+    { "textnum", "0678abc", "", "textnum LIKE '%0678abc%'" },
+};
 ///////////////////////////////
 
 void PbTestClass::ExecutInputTest()
@@ -113,23 +123,29 @@ size_t PbTestClass::StringFuncsTest()
     cout << "------ ClearSearchTest(): ";
     CheckForErrors(ClearSearchTest(), &sumErrors);
 
-    cout << "------ FindByCurrIdTest(): ";
-    CheckForErrors(FindByCurrIdTest(), &sumErrors); 
+    // Initial queries
 
-    cout << "------ FindByMaxIdTest(): ";
-    CheckForErrors(FindByMaxIdTest(), &sumErrors); 
+    cout << "------ FindByTest(): ";
+    CheckForErrors(FindByTest(), &sumErrors);
 
     cout << "------ GetAllTest(): ";
     CheckForErrors(GetAllTest(), &sumErrors); 
 
-    cout << "------ FindByTest(): ";
-    CheckForErrors(FindByTest(), &sumErrors);
+    // Secondary queries
 
     cout << "------ FilterByTest(): ";
     CheckForErrors(FilterByTest(), &sumErrors);
 
     cout << "------ OrderByTest(): ";
     CheckForErrors(OrderByTest(), &sumErrors);
+
+    cout << "------ ChooseEntryTest(): ";
+    CheckForErrors(ChooseEntryTest(), &sumErrors);
+
+    cout << "------ FindJoinedTest(): ";
+    CheckForErrors(FindJoinedTest(), &sumErrors);
+    
+    // Editorial operations
 
     cout << "------ UpdateFieldTest(): ";
     CheckForErrors(UpdateFieldTest(), &sumErrors);
@@ -140,12 +156,26 @@ size_t PbTestClass::StringFuncsTest()
     cout << "------ RemoveEntryTest(): ";
     CheckForErrors(RemoveEntryTest(), &sumErrors);
 
-    cout << "------ FindJoinedTest(): ";
-    CheckForErrors(FindJoinedTest(), &sumErrors);
+    // Helper operations
 
-    cout << "------ ChooseEntryTest(): ";
-    CheckForErrors(ChooseEntryTest(), &sumErrors);
-    
+    cout << "------ FindByCurrIdTest(): ";
+    CheckForErrors(FindByCurrIdTest(), &sumErrors); 
+
+    cout << "------ FindByMaxIdTest(): ";
+    CheckForErrors(FindByMaxIdTest(), &sumErrors); 
+
+    cout << "------ SelectDataTest(): ";
+    CheckForErrors(SelectDataTest(), &sumErrors); 
+
+    cout << "------ SelectDataWhereTest(): ";
+    CheckForErrors(SelectDataWhereTest(), &sumErrors); 
+
+    cout << "------ SelectDataAscTest(): ";
+    CheckForErrors(SelectDataAscTest(), &sumErrors); 
+
+    cout << "------ GetRuleTest(): ";
+    CheckForErrors(GetRuleTest(), &sumErrors); 
+
     return sumErrors;
 }
 
@@ -375,6 +405,39 @@ size_t PbTestClass::FindByMaxIdTest()
             instance->FindByMaxId());
 }
 
+size_t PbTestClass::SelectDataTest()
+{
+    instance->currTable = "pets";
+    return ("SELECT * FROM pets" != instance->SelectData());
+}
+
+size_t PbTestClass::SelectDataWhereTest()
+{
+    instance->currTable = "pets";
+    return ("SELECT * FROM pets WHERE " !=
+            instance->SelectDataWhere());
+}
+
+size_t PbTestClass::SelectDataAscTest()
+{
+    instance->currTable = "pets";
+    return ("SELECT * FROM pets ORDER BY pet_id ASC" !=
+            instance->SelectDataAsc());
+}
+
+size_t PbTestClass::GetRuleTest()
+{
+    size_t errors = 0;
+    for (size_t i = 0; i < N_GETRULE_TESTS; i++)
+    {
+        errors += (getRuleParams[i][4] !=
+            instance->GetRule(getRuleParams[i][0],
+                                getRuleParams[i][1],
+                                getRuleParams[i][2]));
+    }
+
+    return 0;
+}
 
 ////////////////////////////////////////////////////
 
