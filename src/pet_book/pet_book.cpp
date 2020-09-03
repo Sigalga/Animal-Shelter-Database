@@ -45,8 +45,8 @@ static const PetBook::Key OPER_NAMES[] =
     "order",        // 7           secondary
     "clear",        // 8  initial  secondary
     "choose",       // 9  initial  secondary
-    "find_id",      // 10
-    "find_joined"   // 11
+    "display",               // 10
+    "display owner / owned pets"   // 11
 };
 
 static const PetBook::Key INIT_OPER_NAMES[] =
@@ -75,8 +75,8 @@ static const PetBook::Key SEC_OPER_NAMES[] =
 
 static const PetBook::Key CHOOSE_OPER_NAMES[]=
 {
-    OPER_NAMES[10], // 0 find_id
-    OPER_NAMES[11], // 1 find_joined
+    OPER_NAMES[10], // 0 display (find by curr id)
+    OPER_NAMES[11], // 1 display owner / owned pets (find joined)
     OPER_NAMES[3],  // 2 update
     OPER_NAMES[5]   // 3 delete
 };
@@ -85,6 +85,7 @@ static const size_t N_TABLES = (sizeof(DATA_TABLES) / sizeof(string));
 static const size_t N_OPERS = sizeof(OPER_NAMES) / sizeof(PetBook::Key);
 static const size_t N_INIT_OPERS = sizeof(INIT_OPER_NAMES) / sizeof(PetBook::Key);
 static const size_t N_SEC_OPERS =  sizeof(SEC_OPER_NAMES) / sizeof(PetBook::Key);
+static const size_t N_CHOOSE_OPERS =  sizeof(CHOOSE_OPER_NAMES) / sizeof(PetBook::Key);
 
 /////////////////////////////////////////////////////////////////////
 
@@ -419,17 +420,18 @@ string& PetBook::ChooseEntry()
     SetCurrId();
     currQuery = "choose";
 
-    cout << "choose an operation: (type the number)\n"
-    << "1. display entry\n"
-    << "2. display owner / owned pets\n"
-    << "3. update entry\n"
-    << "4. remove entry"
-    << endl;
+    // display menu
+    cout << "choose an operation: (type the number)" << endl;
+    for (size_t i = 0; i < N_CHOOSE_OPERS; i++)
+    {
+        cout << i + 1 << ". " << CHOOSE_OPER_NAMES[i] << endl;
+    }
 
+    // receive choice and execute
     size_t key = 0;
     cin >> key;
-
     currQuery = stringGen->GenerateString(CHOOSE_OPER_NAMES[key - 1]);
+    
     return currQuery;
 }
 

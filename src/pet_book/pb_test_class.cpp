@@ -21,7 +21,11 @@ const string UPDATE_OUT("test_input/updateout.txt");
 const string ADD_IN("test_input/addin.txt");
 const string ADD_OUT("test_input/addout.txt");
 const string JOINED_IN("test_input/findjoinedin.txt");
-const string JOINED_OUT("test_input/findjoinedin.txt");
+const string JOINED_OUT("test_input/findjoinedout.txt");
+const string REMOVE_IN("test_input/removein.txt");
+const string REMOVE_OUT("test_input/removeout.txt");
+const string CHOOSE_IN("test_input/choosein.txt");
+const string CHOOSE_OUT("test_input/chooseout.txt");
 
 // Helper functions
 static void CheckForErrors(size_t errors, size_t* sumErrors);
@@ -72,6 +76,20 @@ const string addQueries[] =
     "INSERT INTO pets (adopter_id, name, age_months, status) VALUES ('abc', 123, 'xyz', 456)"
 };
 
+const string chooseQueries[] =
+{
+    // input: 2 1
+    "SELECT * FROM pets WHERE pet_id=2",
+
+    // input: 2 2
+    "SELECT * FROM adopters WHERE adopter_id=2",
+
+    // input: 2 3 age_months 60
+    "UPDATE pets SET age_months='60' WHERE pet_id=2;",
+
+    // input: 2 4
+    "DELETE FROM pets WHERE pet_id=2;"
+};
 ///////////////////////////////
 
 void PbTestClass::ExecutInputTest()
@@ -119,10 +137,15 @@ size_t PbTestClass::StringFuncsTest()
     cout << "------ AddEntryTest(): ";
     CheckForErrors(AddEntryTest(), &sumErrors);
 
+    cout << "------ RemoveEntryTest(): ";
+    CheckForErrors(RemoveEntryTest(), &sumErrors);
+
     cout << "------ FindJoinedTest(): ";
     CheckForErrors(FindJoinedTest(), &sumErrors);
 
-
+    cout << "------ ChooseEntryTest(): ";
+    CheckForErrors(ChooseEntryTest(), &sumErrors);
+    
     return sumErrors;
 }
 
@@ -216,33 +239,57 @@ size_t PbTestClass::OrderByTest()
     return errors;
 }
 
-size_t PbTestClass::ChooseEntryTest() // TO DO
+size_t PbTestClass::ChooseEntryTest()
 {
-    // TO DO
+    ifstream in(CHOOSE_IN);
+	ofstream out(CHOOSE_OUT);
+    RedirectToFile(&in, &out);
+
+    instance->SetDataTable("pets");
+    instance->currQuery = "";
+
+    // check return values
+    size_t errors = 0;
+    for (size_t i = 0; i < sizeof(chooseQueries)/sizeof(string); i++)
+    {
+        instance->SetDataTable("pets");
+        errors += (chooseQueries[i] != instance->ChooseEntry());
+    }
+
+    RestartToCio();
+
+    return errors;
 }
 
 size_t PbTestClass::FindJoinedTest()
 {
-    size_t errors = 0;
-
-    instance->SetDataTable("pets");
-    instance->currQuery = "choose";
-    instance->currId = "3";
-    errors += ("SELECT * FROM adopters WHERE adopter_id=2" != instance->FindJoined());
-
-    instance->SetDataTable("adopters");
-    instance->currQuery = "choose";
-    instance->currId = "2";
-    errors += ("SELECT * FROM pets WHERE adopter_id=2" != instance->FindJoined());
-
     ifstream in(JOINED_IN);
 	ofstream out(JOINED_OUT);
     RedirectToFile(&in, &out);
 
+    size_t errors = 0;
+
+    // correct parameters fed to instance:
+    // choose a pet and find its joined adopter
+    instance->SetDataTable("pets");
+    instance->currQuery = "choose";
+    instance->currId = "3";
+    errors += ("SELECT * FROM adopters WHERE adopter_id=2" != instance->FindJoined());
+    errors += instance->currId != "query";
+    
+    // choose an adopter and find its joined pet/s
     instance->SetDataTable("adopters");
-    instance->currQuery = "";
+    instance->currQuery = "choose";
     instance->currId = "2";
     errors += ("SELECT * FROM pets WHERE adopter_id=2" != instance->FindJoined());
+    errors += instance->currId != "query";
+    
+    // perameter from user input: 2
+    instance->SetDataTable("adopters");
+    instance->currQuery = "";
+    instance->currId = "";
+    errors += ("SELECT * FROM pets WHERE adopter_id=2" != instance->FindJoined());
+    errors += instance->currId != "query";
 
     RestartToCio();
 
@@ -284,13 +331,35 @@ size_t PbTestClass::AddEntryTest()
     RestartToCio();
 
     return errors;
-
-    return 0;
 }
 
-size_t PbTestClass::RemoveEntryTest() // TO DO
+size_t PbTestClass::RemoveEntryTest()
 {
-    // TO DO
+    ifstream in(REMOVE_IN);
+	ofstream out(REMOVE_OUT);
+    RedirectToFile(&in, &out);
+
+    size_t errors = 0;
+
+    // correct parameters fed to instance
+    instance->SetDataTable("pets");
+    instance->currQuery = "choose";
+    instance->currId = "100";
+    errors += ("DELETE FROM pets WHERE pet_id=100;" != instance->RemoveEntry());
+
+    // incorrect parameters fed to instance
+    instance->currQuery = "choose";
+    instance->currId = "";
+    errors += ("DELETE FROM pets WHERE pet_id=;" != instance->RemoveEntry());
+
+    // user input: 101
+    instance->currQuery = "";
+    instance->currId = "";
+    errors += ("DELETE FROM pets WHERE pet_id=101;" != instance->RemoveEntry());
+
+    RestartToCio();
+
+    return errors;
 }
 
 // Helper operations
