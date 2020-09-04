@@ -24,27 +24,33 @@ public:
     using StringFunc = StmtStringGenerator::StringFunc;
 
     PetBook(Connection* con, StmtStringGenerator* stringGen);
-    ~PetBook() { delete m_fields; }
+    ~PetBook() { delete fields; }
 
     void SetDatabase(const string& db) { petBookDB = db; }
-    void SetDataTable(const string& table);
-    void SetCurrPK();
-    void ResetAutoinc();
 
     void Start();
     void Stop() { isRunning = false; }
 
 private:
-    Connection* con;
+    Connection* con;        // connection to an SQL server database
     StmtStringGenerator* stringGen;
-    string petBookDB;
-    bool isRunning;
-    string currTable;       // for datatable choice
-    string currPK;          // for datatable choice
-    string currId;          // for update operations, otherwise "query" or empty
+    string petBookDB;       // name of the SQL database
+    bool isRunning;         // interactive ui switch
+    string currTable;       // name of the current datatable choice
+    string currPK;          // name of primary key field for current datatable
+    string currId;          // pk value for entry-specific operations, otherwise "query"/"new_id"/empty
     string currQuery;       // for secondary operations concatenation
     string stmtString;      // for stringFuncs
-    ResultSet* m_fields;    // datatable fields
+    ResultSet* fields;      // current datatable's field names
+
+    // Setters /////////////////////////////////////////////////////////////////
+    void SetDataTable(const string& table);
+
+    // Extracts the primary key field name from current datatable choice
+    void SetCurrPK();
+
+    // Resets autoincrementation of the pk to start from current max
+    void ResetAutoinc();
 
     // Main flow functions /////////////////////////////////////////////////////
     // Adds all the StringFuncs to the String Generator

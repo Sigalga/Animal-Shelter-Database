@@ -11,6 +11,8 @@ class PbTestClass
 public:
     PbTestClass(PetBook* petBook) : instance(petBook) {}
 
+    void StartTest();
+    void PrivateMethodsTest();
     void ExecutInputTest();
     void MakeStringTest();
     size_t StringFuncsTest();
@@ -44,12 +46,6 @@ private:
     size_t SelectDataWhereTest();
     size_t SelectDataAscTest();
     size_t GetRuleTest();
-
-
-
-
-
-
 };
 
 } // namespace ashs

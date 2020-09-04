@@ -99,7 +99,7 @@ PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
         currId(""),
         currQuery(""),
         stmtString(""),
-        m_fields(GetFields())
+        fields(GetFields())
 {
 	con->setSchema(petBookDB);
     SetCurrPK();
@@ -243,20 +243,20 @@ ResultSet* PetBook::GetEditResult()
 void PetBook::PrintTable(ResultSet* res)
 {
     // print table headers
-    for (m_fields->beforeFirst(); m_fields->next(); )
+    for (fields->beforeFirst(); fields->next(); )
     {
         cout.width(10);
-        cout << m_fields->getString("COLUMN_NAME") << "\t" << left;
+        cout << fields->getString("COLUMN_NAME") << "\t" << left;
     }
     cout << endl;
 
     // print result set
     while (res->next())
     {
-        for (m_fields->beforeFirst(); m_fields->next(); )
+        for (fields->beforeFirst(); fields->next(); )
         {
             cout.width(10);
-            cout << res->getString(m_fields->getString("COLUMN_NAME")) << "\t" << left;
+            cout << res->getString(fields->getString("COLUMN_NAME")) << "\t" << left;
         }
         cout << endl;
     }
@@ -300,11 +300,11 @@ void PetBook::DisplayFieldMenu()
 {
     cout << "Enter the parameter to search by or modify. options are:" << endl;
 
-    m_fields->first();
-    cout << "- " << m_fields->getString("COLUMN_NAME") << endl;
-    while (m_fields->next())
+    fields->first();
+    cout << "- " << fields->getString("COLUMN_NAME") << endl;
+    while (fields->next())
     {
-        cout << "- " << m_fields->getString("COLUMN_NAME") << endl;
+        cout << "- " << fields->getString("COLUMN_NAME") << endl;
     }
 }
 
@@ -502,19 +502,19 @@ string& PetBook::AddEntry()
 
     // add columns to statement string
     currQuery = "INSERT INTO " + currTable + " (";
-    m_fields->first();
-    m_fields->next();    // skip pk column
-    currQuery += m_fields->getString("COLUMN_NAME");
-    while (m_fields->next())
+    fields->first();
+    fields->next();    // skip pk column
+    currQuery += fields->getString("COLUMN_NAME");
+    while (fields->next())
     {
-        currQuery += (", " + m_fields->getString("COLUMN_NAME"));
+        currQuery += (", " + fields->getString("COLUMN_NAME"));
     }
     currQuery += ") VALUES (";
 
     // add values from input to statement string
-    m_fields->first();
-    m_fields->next();    // skip pk column
-    cout << m_fields->getString("COLUMN_NAME") << ": " << flush;
+    fields->first();
+    fields->next();    // skip pk column
+    cout << fields->getString("COLUMN_NAME") << ": " << flush;
     string val("");
     cin >> val;
 
@@ -526,9 +526,9 @@ string& PetBook::AddEntry()
     {
         currQuery += ("'" + val + "'");
     }
-    while (m_fields->next())
+    while (fields->next())
     {
-        cout << m_fields->getString("COLUMN_NAME") << ": " << flush;
+        cout << fields->getString("COLUMN_NAME") << ": " << flush;
         cin >> val;
         currQuery += (", ");
 
@@ -657,7 +657,7 @@ static void GetSearchVals(string& val, string& val2)
 void PetBook::SetDataTable(const string& table)
 {
     currTable = table;
-    m_fields = GetFields();
+    fields = GetFields();
     SetCurrPK();;
 }
 

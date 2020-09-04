@@ -10,6 +10,12 @@ streambuf *cinbuf = cin.rdbuf();
 streambuf *coutbuf = cout.rdbuf();
 
 // io test file paths
+const string START_IN("test_input/startin.txt");
+const string START_OUT("test_input/startout.txt");
+const string EXEC_INP_IN("test_input/execinpin.txt");
+const string EXEC_INP_OUT("test_input/execinpout.txt");
+const string MAKE_STR_IN("test_input/makestrin.txt");
+const string MAKE_STR_OUT("test_input/makestrout.txt");
 const string FIND_BY_IN("test_input/findbyin.txt");
 const string FIND_BY_OUT("test_input/findbyout.txt");
 const string FILTER_BY_IN("test_input/filterbyin.txt");
@@ -30,7 +36,7 @@ const string CHOOSE_OUT("test_input/chooseout.txt");
 // Helper functions
 static void CheckForErrors(size_t errors, size_t* sumErrors);
 static void RedirectToFile(ifstream* in, ofstream* out);
-static void RestartToCio();
+static void ResetToCio();
 
 // expected return values
 const string findByQueries[] =
@@ -100,22 +106,68 @@ const string getRuleParams[N_GETRULE_TESTS][4] =
     { "text", "hello", "world", "text LIKE '%hello%'" },
     { "textnum", "0678abc", "", "textnum LIKE '%0678abc%'" },
 };
-///////////////////////////////
+// Public Method Tests ////////////////////////////////
+
+void PbTestClass::StartTest()
+{
+    cout << "\n-- StartTest(): ";
+
+    ifstream in(START_IN);
+	ofstream out(START_OUT);
+    RedirectToFile(&in, &out);
+
+	StmtStringGenerator strGen;
+    PetBook petBook(g_con, &strGen);
+    petBook.Start();
+
+	ResetToCio();
+}
+
+// Private Method Tests ////////////////////////////////
+void PbTestClass::PrivateMethodsTest()
+{
+    cout << "\n-- PrivateMethodsTest():" << endl;
+	size_t errors = 0;
+
+	cout << "---- ExecutInputTest(): " << endl;
+	ExecutInputTest();
+
+	cout << "---- MakeStringTest(): " << endl;
+	MakeStringTest();
+
+	cout << "---- StringFuncsTest(): " << endl;
+	errors += StringFuncsTest();
+
+	cout << "---- " << errors << " errors" << endl;
+
+}
 
 void PbTestClass::ExecutInputTest()
 {
+    ifstream in(EXEC_INP_IN);
+	ofstream out(EXEC_INP_OUT);
+    RedirectToFile(&in, &out);
+
     instance->isRunning = true;
     instance->ExecuteInput();
+
+    ResetToCio();
 }
 
 void PbTestClass::MakeStringTest()
 {
+    ifstream in(MAKE_STR_IN);
+	ofstream out(MAKE_STR_OUT);
+    RedirectToFile(&in, &out);
+
     instance->MakeString();
+
+    ResetToCio();
 }
 
 size_t PbTestClass::StringFuncsTest()
 {
-    size_t errors = 0, sumErrors = 0;
+    size_t sumErrors = 0;
 
     cout << "------ ExitTest(): ";
     CheckForErrors(ExitTest(), &sumErrors);
@@ -179,7 +231,7 @@ size_t PbTestClass::StringFuncsTest()
     return sumErrors;
 }
 
-// StringFuncs /////////////////////////////////////////
+// StringFuncs Tests ///////////////////////////////////
 size_t PbTestClass::ExitTest()
 {
     size_t errors = 0;
@@ -217,7 +269,7 @@ size_t PbTestClass::FindByTest()
         errors += (findByQueries[i] != instance->FindBy());
     }
 
-    RestartToCio();
+    ResetToCio();
 
     return errors;
 }
@@ -244,7 +296,7 @@ size_t PbTestClass::FilterByTest()
         instance->currQuery = "";
     }
 
-    RestartToCio();
+    ResetToCio();
 
     return errors;
 }
@@ -264,7 +316,7 @@ size_t PbTestClass::OrderByTest()
         instance->currQuery = "";
     }
 
-    RestartToCio();
+    ResetToCio();
 
     return errors;
 }
@@ -286,7 +338,7 @@ size_t PbTestClass::ChooseEntryTest()
         errors += (chooseQueries[i] != instance->ChooseEntry());
     }
 
-    RestartToCio();
+    ResetToCio();
 
     return errors;
 }
@@ -321,7 +373,7 @@ size_t PbTestClass::FindJoinedTest()
     errors += ("SELECT * FROM pets WHERE adopter_id=2" != instance->FindJoined());
     errors += instance->currId != "query";
 
-    RestartToCio();
+    ResetToCio();
 
     return errors;
 }
@@ -340,7 +392,7 @@ size_t PbTestClass::UpdateFieldTest()
         errors += (updateQueries[i] != instance->UpdateField());
     }
 
-    RestartToCio();
+    ResetToCio();
 
     return errors;
 }
@@ -358,7 +410,7 @@ size_t PbTestClass::AddEntryTest()
         errors += (addQueries[i] != instance->AddEntry());
     }
 
-    RestartToCio();
+    ResetToCio();
 
     return errors;
 }
@@ -387,7 +439,7 @@ size_t PbTestClass::RemoveEntryTest()
     instance->currId = "";
     errors += ("DELETE FROM pets WHERE pet_id=101;" != instance->RemoveEntry());
 
-    RestartToCio();
+    ResetToCio();
 
     return errors;
 }
@@ -462,7 +514,7 @@ static void RedirectToFile(ifstream* in, ofstream* out)
     cout.rdbuf(out->rdbuf());
 }
 
-static void RestartToCio()
+static void ResetToCio()
 {
     cin.rdbuf(cinbuf);
     cout.rdbuf(coutbuf);
