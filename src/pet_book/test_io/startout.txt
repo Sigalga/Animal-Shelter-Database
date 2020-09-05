@@ -1,0 +1,6 @@
+
+Welcome to the PetBook
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit

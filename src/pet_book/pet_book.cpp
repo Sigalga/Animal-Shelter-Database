@@ -323,7 +323,8 @@ ResultSet* PetBook::GetFields()
 string& PetBook::Exit()
 {
     isRunning = false;
-    return stmtString;
+    currQuery = "exit";
+    return currQuery;
 }
 
 string& PetBook::ClearSearch()

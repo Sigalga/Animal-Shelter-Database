@@ -31,13 +31,10 @@ int main()
 
 	StmtStringGenerator strGen;
     PetBook petBook(g_con, &strGen);
-	PbTestClass test(petBook);
+	PbTestClass test(&petBook);
 	
     test.StartTest();
     test.PrivateMethodsTest();
-    test.ExecutInputTest();
-	test.MakeStringTest();
-	test.StringFuncsTest();
 
 	AtExit();
 

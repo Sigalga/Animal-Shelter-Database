@@ -13,14 +13,14 @@ public:
 
     void StartTest();
     void PrivateMethodsTest();
-    void ExecutInputTest();
-    void MakeStringTest();
+    size_t ExecutInputTest();
+    size_t MakeStringTest();
     size_t StringFuncsTest();
 
 private:
     PetBook* instance;
 
-    // StringFuncs //////////////
+    // StringFunc Tests //////////////
     size_t ExitTest();
     size_t ClearSearchTest();
 

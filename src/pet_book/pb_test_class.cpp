@@ -10,28 +10,28 @@ streambuf *cinbuf = cin.rdbuf();
 streambuf *coutbuf = cout.rdbuf();
 
 // io test file paths
-const string START_IN("test_input/startin.txt");
-const string START_OUT("test_input/startout.txt");
-const string EXEC_INP_IN("test_input/execinpin.txt");
-const string EXEC_INP_OUT("test_input/execinpout.txt");
-const string MAKE_STR_IN("test_input/makestrin.txt");
-const string MAKE_STR_OUT("test_input/makestrout.txt");
-const string FIND_BY_IN("test_input/findbyin.txt");
-const string FIND_BY_OUT("test_input/findbyout.txt");
-const string FILTER_BY_IN("test_input/filterbyin.txt");
-const string FILTER_BY_OUT("test_input/filterbyout.txt");
-const string ORDER_BY_IN("test_input/orderbyin.txt");
-const string ORDER_BY_OUT("test_input/orderbyout.txt");
-const string UPDATE_IN("test_input/updatein.txt");
-const string UPDATE_OUT("test_input/updateout.txt");
-const string ADD_IN("test_input/addin.txt");
-const string ADD_OUT("test_input/addout.txt");
-const string JOINED_IN("test_input/findjoinedin.txt");
-const string JOINED_OUT("test_input/findjoinedout.txt");
-const string REMOVE_IN("test_input/removein.txt");
-const string REMOVE_OUT("test_input/removeout.txt");
-const string CHOOSE_IN("test_input/choosein.txt");
-const string CHOOSE_OUT("test_input/chooseout.txt");
+const string START_IN("test_io/startin.txt");
+const string START_OUT("test_io/startout.txt");
+const string EXEC_INP_IN("test_io/execinpin.txt");
+const string EXEC_INP_OUT("test_io/execinpout.txt");
+const string MAKE_STR_IN("test_io/makestrin.txt");
+const string MAKE_STR_OUT("test_io/makestrout.txt");
+const string FIND_BY_IN("test_io/findbyin.txt");
+const string FIND_BY_OUT("test_io/findbyout.txt");
+const string FILTER_BY_IN("test_io/filterbyin.txt");
+const string FILTER_BY_OUT("test_io/filterbyout.txt");
+const string ORDER_BY_IN("test_io/orderbyin.txt");
+const string ORDER_BY_OUT("test_io/orderbyout.txt");
+const string UPDATE_IN("test_io/updatein.txt");
+const string UPDATE_OUT("test_io/updateout.txt");
+const string ADD_IN("test_io/addin.txt");
+const string ADD_OUT("test_io/addout.txt");
+const string JOINED_IN("test_io/findjoinedin.txt");
+const string JOINED_OUT("test_io/findjoinedout.txt");
+const string REMOVE_IN("test_io/removein.txt");
+const string REMOVE_OUT("test_io/removeout.txt");
+const string CHOOSE_IN("test_io/choosein.txt");
+const string CHOOSE_OUT("test_io/chooseout.txt");
 
 // Helper functions
 static void CheckForErrors(size_t errors, size_t* sumErrors);
@@ -110,15 +110,13 @@ const string getRuleParams[N_GETRULE_TESTS][4] =
 
 void PbTestClass::StartTest()
 {
-    cout << "\n-- StartTest(): ";
+    cout << "-- StartTest(): " << endl;
 
     ifstream in(START_IN);
 	ofstream out(START_OUT);
     RedirectToFile(&in, &out);
 
-	StmtStringGenerator strGen;
-    PetBook petBook(g_con, &strGen);
-    petBook.Start();
+	instance->Start();
 
 	ResetToCio();
 }
@@ -126,43 +124,79 @@ void PbTestClass::StartTest()
 // Private Method Tests ////////////////////////////////
 void PbTestClass::PrivateMethodsTest()
 {
-    cout << "\n-- PrivateMethodsTest():" << endl;
-	size_t errors = 0;
+    cout << "-- PrivateMethodsTest():" << endl;
 
-	cout << "---- ExecutInputTest(): " << endl;
-	ExecutInputTest();
+	size_t sumErrors = 0;
 
-	cout << "---- MakeStringTest(): " << endl;
-	MakeStringTest();
+	cout << "---- ExecutInputTest(): ";
+	CheckForErrors(ExecutInputTest(), &sumErrors);
+
+	cout << "---- MakeStringTest(): ";
+	CheckForErrors(MakeStringTest(), &sumErrors);
 
 	cout << "---- StringFuncsTest(): " << endl;
-	errors += StringFuncsTest();
-
-	cout << "---- " << errors << " errors" << endl;
-
+    CheckForErrors(StringFuncsTest(), &sumErrors);
 }
 
-void PbTestClass::ExecutInputTest()
+size_t PbTestClass::ExecutInputTest()
 {
     ifstream in(EXEC_INP_IN);
 	ofstream out(EXEC_INP_OUT);
     RedirectToFile(&in, &out);
 
+    size_t errors = 0;
+
+    // input: 1 exit
     instance->isRunning = true;
+    instance->currQuery = "";
     instance->ExecuteInput();
+    errors += ("exit" != instance->currQuery);
+
+    // input: 2 exit
+    instance->isRunning = true;
+    instance->currQuery = "";
+    instance->ExecuteInput();
+    errors += ("exit" != instance->currQuery);
+
+    // input:3
+    instance->isRunning = true;
+    instance->currQuery = "";
+    instance->ExecuteInput();
+    errors += ("exit" != instance->currQuery);
 
     ResetToCio();
+
+    return errors;
 }
 
-void PbTestClass::MakeStringTest()
+size_t PbTestClass::MakeStringTest()
 {
     ifstream in(MAKE_STR_IN);
 	ofstream out(MAKE_STR_OUT);
     RedirectToFile(&in, &out);
 
+    size_t errors = 0;
+
+    // input: 1 exit
     instance->MakeString();
+    errors += (instance->currQuery != instance->Exit());
+
+    // new search, input: 1 show_all
+    instance->currId = "";
+    instance->MakeString();
+    errors += (instance->currQuery != instance->GetAll());
+
+    // TO DO:
+    // - find
+    // - update
+    // - add_new
+    // - delete
+    // - choose
+    // - clear
 
     ResetToCio();
+
+    return errors;
 }
 
 size_t PbTestClass::StringFuncsTest()
@@ -228,6 +262,8 @@ size_t PbTestClass::StringFuncsTest()
     cout << "------ GetRuleTest(): ";
     CheckForErrors(GetRuleTest(), &sumErrors); 
 
+    cout << "---- ";
+
     return sumErrors;
 }
 
@@ -238,6 +274,7 @@ size_t PbTestClass::ExitTest()
 
     instance->Exit();
     errors += (false != instance->isRunning);
+    errors += ("exit" != instance->currQuery);
     
     return errors;
 }
