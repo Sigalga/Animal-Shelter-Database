@@ -1,0 +1,16 @@
+choose an entry and enter its pet_id
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a new value for the parameter
+choose an entry and enter its pet_id
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a new value for the parameter

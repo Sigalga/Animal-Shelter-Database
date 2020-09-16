@@ -1,0 +1,31 @@
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a new value for the parameter
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
