@@ -60,7 +60,7 @@ private:
     void ExecuteInput();
 
     // Receives user input and produces an SQL statement string
-    const string& MakeString();
+    void MakeString();
 
     // Menu Displayers /////////////////////////////////////////////////////////
     // Displays a list of datatables and enables to choose one
@@ -109,15 +109,19 @@ private:
     // or a range of values
     const string& FilterBy();
     //
-    // Oraders an existing serach result set by a field's value,
+    // Orders an existing serach result set by a field's value,
     // either in an ascending or descending order
     const string& OrderBy();
     //
     const string& ChooseEntry();
     //
-    // Receives an adopter id to show all of its pets
-    // or: a pet id to show its adopter
+    // Receives an adopter id to show all of its pets,
+    // or a pet id to show its adopter
     const string& FindJoined();
+    //
+    // Presents a single, currently chosen entry,
+    // which had been chosen with ChooseEntry().
+    const string& FindCurrChoice();
     //
     //////////////////////////////////////////////////////////
 
@@ -134,7 +138,7 @@ private:
     const string& RemoveEntry();
     //
     //////////////////////////////////////////////////////////
-
+    
     // Helper operations /////////////////////////////////////
     //
     // Rereives the entry most recently edited by PetBook
@@ -144,23 +148,23 @@ private:
     const string& FindByMaxId();
     //
     // A query start phrase, retreives all table data
-    string& SelectData();
+    const string& SelectData();
     //
     // A query start phrase, to be followed by a rule
-    string& SelectDataWhere();
+    const string& SelectDataWhere();
     //
     // A query start phrase, retreives all table data
     // ordered by its pk in an ascending order
-    string& SelectDataAsc();
+    const string& SelectDataAsc();
     //
     // A rule phrase for a query, to follow a start phrase
-    string& GetRule(const string& col, const string& val, const string& val2);
+    const string& GetRule(const string& col, const string& val, const string& val2);
     //
     // Sets currId to a user input
     void SetCurrId();
     //
     // Gets the foreign key value of an entry identified by currId
-    string& GetCurrFKVal();
+    const string& GetCurrFKVal();
     //
     //////////////////////////////////////////////////////////
 

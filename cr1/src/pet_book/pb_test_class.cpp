@@ -1,6 +1,11 @@
-#include "pb_test_class.hpp"
-#include <fstream>
+// Standard C++ includes
 #include <iostream>
+#include <vector>
+#include <fstream>
+
+#include "pb_test_class.hpp"
+
+using namespace std;
 
 namespace ashs
 {
@@ -39,14 +44,14 @@ static void RedirectToFile(ifstream* in, ofstream* out);
 static void ResetToCio();
 
 // expected return values
-const string findByQueries[] =
+static const vector<string> findByQueries =
 {
     "SELECT * FROM pets WHERE name LIKE '%Luna%'",  // input: name Luna
     "SELECT * FROM pets WHERE name=5",              // input: name 5
     "SELECT * FROM pets WHERE 6=2",                 // input: 6 2
 };
 
-const string filterByQueries[] =
+static const vector<string> filterByQueries =
 {
     // input: name Luna age_months 20
     "SELECT * FROM pets WHERE name LIKE '%Luna%' AND age_months=20",
@@ -55,13 +60,13 @@ const string filterByQueries[] =
     "SELECT * FROM pets WHERE status LIKE '%adopted%' AND name LIKE '%Luna%'"
 };
 
-const string orderByQueries[] =
+static const vector<string> orderByQueries =
 {
     // input: name Luna age_months 20
     "SELECT * FROM pets WHERE status LIKE '%adopted%' ORDER BY age_months DESC"
 };
 
-const string updateQueries[] =
+static const vector<string> updateQueries =
 {
     // input: 3 status inshelter
     "UPDATE pets SET status='inshelter' WHERE pet_id=3;",
@@ -70,7 +75,7 @@ const string updateQueries[] =
     "UPDATE pets SET 6='0' WHERE pet_id=f;"
 };
 
-const string addQueries[] =
+static const vector<string> addQueries =
 {
     // input: 100 Shushu 5 inshelter
     "INSERT INTO pets (adopter_id, name, age_months, status) VALUES (100, 'Shushu', 5, 'inshelter')",
@@ -82,7 +87,7 @@ const string addQueries[] =
     "INSERT INTO pets (adopter_id, name, age_months, status) VALUES ('abc', 123, 'xyz', 456)"
 };
 
-const string chooseQueries[] =
+static const vector<string> chooseQueries =
 {
     // input: 2 1
     "SELECT * FROM pets WHERE pet_id=2",
@@ -97,8 +102,10 @@ const string chooseQueries[] =
     "DELETE FROM pets WHERE pet_id=2;"
 };
 
-const size_t N_GETRULE_TESTS = 5;
-const string getRuleParams[N_GETRULE_TESTS][4] =
+// const size_t N_GETRULE_TESTS = 5;
+// static const string getRuleParams[N_GETRULE_TESTS][4] =
+
+static const vector<vector<string> > getRuleParams =
 {
     { "number", "2", "", "number=2" },
     { "number", "2", "3", "number BETWEEN 2 AND 3" },
@@ -128,10 +135,10 @@ void PbTestClass::PrivateMethodsTest()
 
 	size_t sumErrors = 0;
 
-	cout << "---- ExecutInputTest(): ";
+	cout << "---- ExecutInputTest(): " << endl;
 	CheckForErrors(ExecutInputTest(), &sumErrors);
 
-	cout << "---- MakeStringTest(): ";
+	cout << "---- MakeStringTest(): " << endl;
 	CheckForErrors(MakeStringTest(), &sumErrors);
 
 	cout << "---- StringFuncsTest(): " << endl;
@@ -301,9 +308,9 @@ size_t PbTestClass::FindByTest()
 
     // check return values
     size_t errors = 0;
-    for (size_t i = 0; i < sizeof(findByQueries)/sizeof(string); i++)
+    for (auto query : findByQueries)
     {
-        errors += (findByQueries[i] != instance->FindBy());
+        errors += (query != instance->FindBy());
     }
 
     ResetToCio();
@@ -326,11 +333,11 @@ size_t PbTestClass::FilterByTest()
     
     // check return values
     size_t errors = 0;
-    for (size_t i = 0; i < sizeof(filterByQueries)/sizeof(string); i++)
+    for (auto query : filterByQueries)
     {
         instance->currQuery = instance->FindBy();
-        errors += (filterByQueries[i] != instance->FilterBy());
-        instance->currQuery = "";
+        errors += (query != instance->FilterBy());
+        instance->currQuery = ""; 
     }
 
     ResetToCio();
@@ -346,10 +353,10 @@ size_t PbTestClass::OrderByTest()
     
     // check return values
     size_t errors = 0;
-    for (size_t i = 0; i < sizeof(orderByQueries)/sizeof(string); i++)
+    for (auto query : orderByQueries)
     {
         instance->currQuery = instance->FindBy();
-        errors += (orderByQueries[i] != instance->OrderBy());
+        errors += (query != instance->OrderBy());
         instance->currQuery = "";
     }
 
@@ -369,10 +376,10 @@ size_t PbTestClass::ChooseEntryTest()
 
     // check return values
     size_t errors = 0;
-    for (size_t i = 0; i < sizeof(chooseQueries)/sizeof(string); i++)
+    for (auto query : chooseQueries)
     {
         instance->SetDataTable("pets");
-        errors += (chooseQueries[i] != instance->ChooseEntry());
+        errors += (query != instance->ChooseEntry());
     }
 
     ResetToCio();
@@ -424,9 +431,9 @@ size_t PbTestClass::UpdateFieldTest()
     
     // check return values
     size_t errors = 0;
-    for (size_t i = 0; i < sizeof(updateQueries)/sizeof(string); i++)
+    for (auto query : updateQueries)
     {
-        errors += (updateQueries[i] != instance->UpdateField());
+        errors += (query != instance->UpdateField());
     }
 
     ResetToCio();
@@ -442,9 +449,9 @@ size_t PbTestClass::AddEntryTest()
     
     // check return values
     size_t errors = 0;
-    for (size_t i = 0; i < sizeof(addQueries)/sizeof(string); i++)
+    for (auto query : addQueries)
     {
-        errors += (addQueries[i] != instance->AddEntry());
+        errors += (query != instance->AddEntry());
     }
 
     ResetToCio();
@@ -517,14 +524,17 @@ size_t PbTestClass::SelectDataAscTest()
 size_t PbTestClass::GetRuleTest()
 {
     size_t errors = 0;
-    for (size_t i = 0; i < N_GETRULE_TESTS; i++)
+    string col, val, val2, rule;
+    for (auto test : getRuleParams)
     {
-        errors += (getRuleParams[i][4] !=
-            instance->GetRule(getRuleParams[i][0],
-                                getRuleParams[i][1],
-                                getRuleParams[i][2]));
-    }
+        col = test.at(0);
+        val = test.at(1);
+        val2 = test.at(2);
+        rule = test.at(3);
 
+        errors += (rule != instance->GetRule(col, val, val2));
+    }
+    
     return 0;
 }
 

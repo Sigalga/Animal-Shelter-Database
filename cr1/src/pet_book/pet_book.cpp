@@ -9,14 +9,11 @@
 #include <cppconn/prepared_statement.h>	// sql::PreparedStatement
 #include <cppconn/exception.h>          // sql::SQLException
 
-// Boost includes
-#include <boost/bind.hpp>			    // boost::bind
-#include <boost/function.hpp>		    // boost::function
-
 #include "pet_book.hpp"
 
 using namespace sql;
-using namespace std; 
+using namespace std;
+
 namespace ashs
 {
 
@@ -27,8 +24,9 @@ static void GetSearchVals(string& val, string& val2);
 
 // constants
 static const string PET_BOOK_DB("pet_book");
-static const std::vector<string> DATA_TABLES = { "pets", "adopters" };
-static const string DEF_TABLE(DATA_TABLES[0]);
+static const vector<string> DATA_TABLES = { "pets", "adopters" };
+static const string DEFAULT_TABLE("pets");
+static const size_t NO_TABLE_IDX = DATA_TABLES.size() + 1;
 static const string FK("adopter_id");
 static const string WELCOME_MSG("\nWelcome to the PetBook");
 
@@ -39,7 +37,7 @@ static const string WELCOME_MSG("\nWelcome to the PetBook");
 //! SL.con.2: Prefer using STL vector by default unless you have a reason to use a different container
 //! https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#slcon2-prefer-using-stl-vector-by-default-unless-you-have-a-reason-to-use-a-different-container
 
-static const std::vector<PetBook::Key> OPER_NAMES =
+static const vector<PetBook::Key> OPER_NAMES =
 {
     "exit",         // 0  initial  secondary
     "show_all",     // 1  initial
@@ -51,11 +49,11 @@ static const std::vector<PetBook::Key> OPER_NAMES =
     "order",        // 7           secondary
     "clear",        // 8  initial  secondary
     "choose",       // 9  initial  secondary
-    "display",                      // 10
-    "display owner / owned pets"    // 11
+    "display",                      // 10 choice
+    "display owner / owned pets"    // 11 choice
 };
 
-static const std::vector<PetBook::Key> INIT_OPER_NAMES =
+static const vector<PetBook::Key> INIT_OPER_NAMES =
 {
     OPER_NAMES[1],  // show_all
     OPER_NAMES[2],  // find
@@ -67,24 +65,24 @@ static const std::vector<PetBook::Key> INIT_OPER_NAMES =
     OPER_NAMES[0]   // exit
 };
 
-static const std::vector<PetBook::Key> SEC_OPER_NAMES =
+static const vector<PetBook::Key> SEC_OPER_NAMES =
 {
-    OPER_NAMES[3],
-    OPER_NAMES[4],
-    OPER_NAMES[5],
-    OPER_NAMES[6],
-    OPER_NAMES[7],
-    OPER_NAMES[9],
+    OPER_NAMES[3],  // update
+    OPER_NAMES[4],  // add_new
+    OPER_NAMES[5],  // delete
+    OPER_NAMES[6],  // filter
+    OPER_NAMES[7],  // order
+    OPER_NAMES[9],  // choose
     OPER_NAMES[8],  // clear
     OPER_NAMES[0]   // exit
 };
 
-static const std::vector<PetBook::Key> CHOOSE_OPER_NAMES =
+static const vector<PetBook::Key> CHOICE_OPER_NAMES =
 {
-    OPER_NAMES[10], // 0 display (find by curr id)
-    OPER_NAMES[11], // 1 display owner / owned pets (find joined)
-    OPER_NAMES[3],  // 2 update
-    OPER_NAMES[5]   // 3 delete
+    OPER_NAMES[10], // display (find by curr id)
+    OPER_NAMES[11], // display owner / owned pets (find joined)
+    OPER_NAMES[3],  // update
+    OPER_NAMES[5]   // delete
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -96,7 +94,7 @@ PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
         stringGen(stringGen),
         petBookDB(PET_BOOK_DB),
         isRunning(false),
-        currTable(DEF_TABLE),
+        currTable(DEFAULT_TABLE),
         currPK(""),
         currId(""),
         currQuery(""),
@@ -108,46 +106,37 @@ PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
     InitStringGen();
 }
 
-//! Consider using lambdas or `std::bind` (preferably lambdas)
-//! https://theboostcpplibraries.com/boost.bind
 void PetBook::InitStringGen()
 {
-    static const std::vector<PetBook::StringFunc> stringFuncs =
+    static const std::vector<StringFunc> stringFuncs =
     {
-        boost::bind(&PetBook::Exit,         this),
-        boost::bind(&PetBook::GetAll,       this),
-        boost::bind(&PetBook::FindBy,       this),
-        boost::bind(&PetBook::UpdateField,  this),
-        boost::bind(&PetBook::AddEntry,     this),
-        boost::bind(&PetBook::RemoveEntry,  this),
-        boost::bind(&PetBook::FilterBy,     this),
-        boost::bind(&PetBook::OrderBy,      this),
-        boost::bind(&PetBook::ClearSearch,  this),
-        boost::bind(&PetBook::ChooseEntry,  this),
-        boost::bind(&PetBook::FindByCurrId, this),
-        boost::bind(&PetBook::FindJoined,   this)
+        [this](){ return Exit();            },
+        [this](){ return GetAll();          },
+        [this](){ return FindBy();          },
+        [this](){ return UpdateField();     },
+        [this](){ return AddEntry();        },
+        [this](){ return RemoveEntry();     },
+        [this](){ return FilterBy();        },
+        [this](){ return OrderBy();         },
+        [this](){ return ClearSearch();     },
+        [this](){ return ChooseEntry();     },
+        [this](){ return FindCurrChoice();  },
+        [this](){ return FindJoined();      }
     };
 
-    // Add operations
-    // for (size_t i = 0; i < N_OPERS; i++)
-    // {
-    //     stringGen->AddStringFunc(OPER_NAMES[i], stringFuncs[i]);
-    // }
-
-    // for (size_t i = 0; i < OPER_NAMES.size(); i++)
-    // {
-    //     stringGen->AddStringFunc(OPER_NAMES[i], stringFuncs[i]);
-    // }
-
-    auto onIter = OPER_NAMES.begin();
-    auto sfIter = stringFuncs.begin();
-    for ( ;
-        onIter != OPER_NAMES.end() && sfIter != stringFuncs.end();
-        ++onIter, ++sfIter)
+    for (size_t i = 0; i < OPER_NAMES.size(); i++)
     {
-        stringGen->AddStringFunc(*onIter, *sfIter);
+        stringGen->AddStringFunc(OPER_NAMES[i], stringFuncs[i]);
     }
-    
+
+    // auto onIter = OPER_NAMES.begin();
+    // auto sfIter = stringFuncs.begin();
+    // for ( ;
+    //     onIter != OPER_NAMES.end() && sfIter != stringFuncs.end();
+    //     ++onIter, ++sfIter)
+    // {
+    //     stringGen->AddStringFunc(*onIter, *sfIter);
+    // }
 }
 
 void PetBook::Start()
@@ -160,11 +149,11 @@ void PetBook::Start()
 
 void PetBook::ExecuteInput()
 {
-    currQuery = MakeString();
+    MakeString();
 
     while (isRunning)
     {
-        if (0 != currQuery.compare(""))
+        if ("" != currQuery)
         {
             PreparedStatement* pstmt = NULL;
 
@@ -181,28 +170,31 @@ void PetBook::ExecuteInput()
             delete pstmt;
         }
 
-        currQuery = MakeString();
+        MakeString();
     }
 }
 
-const string& PetBook::MakeString()
+void PetBook::MakeString()
 {
     // choose table
-    if (0 == currId.compare("")) // new search
+    if ("" == currId) // new search
     {
         DisplayTableMenu();
+
         size_t i;
         cin >> i;
-        while (cin.fail() || !(1 <= i && i <= DATA_TABLES.size() + 1))
+
+        // handle bad input
+        while (cin.fail() || !(1 <= i && i <= NO_TABLE_IDX))
         {
             cin.clear();
             cin.ignore(256,'\n');
             cin >> i;
         }
 
-        if (DATA_TABLES.size() + 1 == i)
+        if (NO_TABLE_IDX == i)
         {
-            return Exit();
+            Exit();
         }
         else
         {
@@ -215,13 +207,14 @@ const string& PetBook::MakeString()
     string key;
     cin >> key;
 
-    return stringGen->GenerateString(key);
+    // generates a string into currQuery
+    stringGen->GenerateString(key);
 }
 
 // Result Displayers
 void PetBook::DisplayResults(ResultSet* res)
 {   
-    if (0 != currId.compare("query"))       // editorial
+    if ("query" != currId)       // editorial
     {
         delete res;
         res = GetEditResult();
@@ -235,14 +228,12 @@ void PetBook::DisplayResults(ResultSet* res)
 
 ResultSet* PetBook::GetEditResult()
 {
-    // ResultSet* res;
     ResultSet* res = NULL;
     PreparedStatement* pstmt = NULL;
 
     try
     {
-        // PreparedStatement* pstmt;
-        if (0 == currId.compare("new_id"))  // new entry added
+        if ("new_id" == currId)  // new entry added
         {
             pstmt = con->prepareStatement(FindByMaxId());
         }
@@ -252,7 +243,6 @@ ResultSet* PetBook::GetEditResult()
         }
 
         res = pstmt->executeQuery();
-        // delete pstmt;
     }
     catch (sql::SQLException &e)
     {
@@ -291,11 +281,11 @@ void PetBook::DisplayTableMenu()
     cout << "Search in... (type the number)" << endl;
 
     size_t i = 0;
-    for (i = 0; i < DATA_TABLES.size(); i++)
+    for (auto table : DATA_TABLES)
     {
-        cout << i+1 << ". " << DATA_TABLES[i] << endl;
+        cout << ++i << ". " << table << endl;
     }
-    cout << i+1 << ". exit" << endl;
+    cout << ++i << ". exit" << endl;
 }
 
 void PetBook::DisplayOperMenu()
@@ -303,15 +293,14 @@ void PetBook::DisplayOperMenu()
     cout << "Select an operation by typing it.\n"
     << "Available operations in " << currTable << " are:" << endl;
 
-    if (0 == currId.compare("")) // new search
+    if ("" == currId)   // new search
     {
         for (auto name : INIT_OPER_NAMES)
         {
             cout << "- " << name << endl;
         }
-
     }
-    else                        // concat queries
+    else                // concat queries
     {
         for (auto name : SEC_OPER_NAMES)
         {
@@ -410,11 +399,10 @@ const string& PetBook::FilterBy()
     string val(""), val2("");
     GetSearchVals(val, val2);
 
-    // add rule
+    // add rule to the current query
     const string rule(GetRule(col, val, ""));
     const string getAll(SelectDataAsc());
-
-    if (0 == currQuery.compare(getAll))
+    if (getAll == currQuery)
     {
         const string select(SelectDataWhere());
         currQuery = (select + rule);
@@ -439,9 +427,8 @@ const string& PetBook::OrderBy()
     string order("");
     cin >> order;
 
-    // add rule
-    const string getAllAsc(SelectDataAsc());
-    if (0 == currQuery.compare(getAllAsc))
+    // add rule to the current query
+    if (SelectDataAsc() == currQuery)
     {
         currQuery = SelectData();
     }
@@ -450,7 +437,6 @@ const string& PetBook::OrderBy()
     return currQuery;
 }
 
-// TO DO: check/test cin validity
 const string& PetBook::ChooseEntry()
 {
     // choose a single entry and notify future calls
@@ -460,7 +446,7 @@ const string& PetBook::ChooseEntry()
     // display menu
     cout << "choose an operation: (type the number)" << endl;
     size_t i = 0;
-    for (auto name : CHOOSE_OPER_NAMES)
+    for (auto name : CHOICE_OPER_NAMES)
     {
         cout << ++i << ". " << name << endl;
     }
@@ -468,33 +454,33 @@ const string& PetBook::ChooseEntry()
     // receive choice and execute
     size_t key = 0;
     cin >> key;
-    currQuery = stringGen->GenerateString(CHOOSE_OPER_NAMES[key - 1]);
-    
+    stringGen->GenerateString(CHOICE_OPER_NAMES[key - 1]);
+
     return currQuery;
 }
 
 const string& PetBook::FindJoined()
 {
     // choose a single entry, if not chosen
-    if (0 != currQuery.compare("choose"))
+    if ("choose" != currQuery)
     {
         SetCurrId();
     }
 
     // extract the foreign key value of the chosen entry
-    string foreignKey = GetCurrFKVal();
+    const string foreignKey = GetCurrFKVal();
 
     // identify as a query for result display
     currId = "query";
 
     // choose an adopter's adopter_id and showing all its pets
-    if (0 == currTable.compare("adopters"))
+    if ("adopters" == currTable)
     {
         SetDataTable("pets");
         currQuery = "SELECT * FROM pets WHERE " + FK + "=" + foreignKey;
     }
     // choose a pet's adopter_id and showing that adopter
-    else if (0 == currTable.compare("pets"))
+    else if ("pets" == currTable)
     {
         SetDataTable("adopters");
         currQuery = "SELECT * FROM adopters WHERE " + FK + "=" + foreignKey;
@@ -508,11 +494,17 @@ const string& PetBook::FindJoined()
     return currQuery;
 }
 
+const string& PetBook::FindCurrChoice()
+{
+    currQuery = FindByCurrId();
+    return currQuery;
+}
+
 // editorial operations
 const string& PetBook::UpdateField()
 {
     // choose a single entry, if not chosen
-    if (0 != currQuery.compare("choose"))
+    if ("choose" != currQuery)
     {
         SetCurrId();
     }
@@ -587,7 +579,7 @@ const string& PetBook::AddEntry()
 const string& PetBook::RemoveEntry()
 {
     // choose a single entry, if not chosen
-    if (0 != currQuery.compare("choose"))
+    if ("choose" != currQuery)
     {
         SetCurrId();
     }
@@ -597,7 +589,6 @@ const string& PetBook::RemoveEntry()
 }
 
 // helper operations
-
 const string& PetBook::FindByCurrId()
 {
     const string select(SelectDataWhere());
@@ -614,7 +605,7 @@ const string& PetBook::FindByMaxId()
 }
 
 // Helper functions ////////////////////////////////////////////////////////
-string& PetBook::GetRule(const string& col, const string& val, const string& val2)
+const string& PetBook::GetRule(const string& col, const string& val, const string& val2)
 {
     if (isNum(val))
     {
@@ -638,20 +629,20 @@ string& PetBook::GetRule(const string& col, const string& val, const string& val
     return stmtString;
 }
 
-string& PetBook::SelectData()
+const string& PetBook::SelectData()
 {
     stmtString = ("SELECT * FROM " + currTable);
     return stmtString;
 }
 
-string& PetBook::SelectDataWhere()
+const string& PetBook::SelectDataWhere()
 {
     SelectData();
     stmtString += " WHERE ";
     return stmtString;
 }
 
-string& PetBook::SelectDataAsc()
+const string& PetBook::SelectDataAsc()
 {
     SelectData();
     stmtString += (" ORDER BY " + currPK + " ASC");
@@ -660,7 +651,7 @@ string& PetBook::SelectDataAsc()
 
 void PetBook::SetCurrId()
 {
-    // choose a single entry
+    // receive an id for a single entry
     cout << "choose an entry and enter its " << currPK << endl;
     cin >> currId;
 }
@@ -723,7 +714,7 @@ void PetBook::SetCurrPK()
 
 }
 
-string& PetBook::GetCurrFKVal()
+const string& PetBook::GetCurrFKVal()
 {
     PreparedStatement* pstmt = NULL;
     ResultSet* res = NULL;
