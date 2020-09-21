@@ -34,20 +34,14 @@ vector<StmtStringGenerator::Key> StmtStringGenerator::GetKeys()
     return keysVec;
 }
 
-//! Prefer `find` to `at`.
-//! https://en.cppreference.com/w/cpp/container/map/find
-//! It's a bit more code, but avoiding the exceptions here is considered a best practice.
-const string& StmtStringGenerator::GenerateString(const Key key)
+void StmtStringGenerator::GenerateString(const Key key)
 {
-    try
+    auto strFuncIter = stringFuncs.find(key);
+
+    if (stringFuncs.end() != strFuncIter)
     {
-        return stringFuncs.at(key)();
-    }
-    catch(const std::out_of_range& e)
-    {
-        return string("");
+        strFuncIter->second();
     }
 }
-
 
 } // namespace ashs

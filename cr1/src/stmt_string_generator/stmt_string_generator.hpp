@@ -27,12 +27,13 @@ public:
     // Returns a vector of all stringFuncs keys
     std::vector<Key> GetKeys();
 
-    const std::string& GenerateString(const Key key);
+    void GenerateString(const Key key);
 
     void AtExit();
 
 private:
     FuncMap stringFuncs;
+    std::string generatedStr;
 };
 
 } // namespace ashs
