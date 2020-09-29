@@ -1,1 +1,0 @@
-choose an entry and enter its adopter_id

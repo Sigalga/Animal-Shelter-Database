@@ -1,4 +1,0 @@
-Enter the values for each parameter:
-adopter_id: name: age_months: status: Enter the values for each parameter:
-adopter_id: name: age_months: status: Enter the values for each parameter:
-adopter_id: name: age_months: status: 
