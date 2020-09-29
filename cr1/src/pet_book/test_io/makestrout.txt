@@ -1,0 +1,914 @@
+Select an operation by typing it.
+Available operations in pets are:
+- update
+- add_new
+- delete
+- filter
+- order
+- choose
+- clear
+- exit
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Select an operation by typing it.
+Available operations in pets are:
+- update
+- add_new
+- delete
+- filter
+- order
+- choose
+- clear
+- exit
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Select an operation by typing it.
+Available operations in pets are:
+- update
+- add_new
+- delete
+- filter
+- order
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Select an operation by typing it.
+Available operations in pets are:
+- update
+- add_new
+- delete
+- filter
+- order
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Select an operation by typing it.
+Available operations in pets are:
+- update
+- add_new
+- delete
+- filter
+- order
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Select an operation by typing it.
+Available operations in pets are:
+- update
+- add_new
+- delete
+- filter
+- order
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Select an operation by typing it.
+Available operations in pets are:
+- update
+- add_new
+- delete
+- filter
+- order
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Select an operation by typing it.
+Available operations in pets are:
+- update
+- add_new
+- delete
+- filter
+- order
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Select an operation by typing it.
+Available operations in pets are:
+- update
+- add_new
+- delete
+- filter
+- order
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Select an operation by typing it.
+Available operations in pets are:
+- update
+- add_new
+- delete
+- filter
+- order
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a value for the parameter.
+To enter a number range, type the numbers like so:
+-r <min> <max>
+Select an operation by typing it.
+Available operations in pets are:
+- update
+- add_new
+- delete
+- filter
+- order
+- choose
+- clear
+- exit
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter the order (ASC / DESC)
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a new value for the parameter
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a new value for the parameter
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a new value for the parameter
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a new value for the parameter
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a new value for the parameter
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+Enter the parameter to search by or modify. options are:
+- pet_id
+- adopter_id
+- name
+- age_months
+- status
+Enter a new value for the parameter
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the values for each parameter:
+adopter_id: name: age_months: status: Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the values for each parameter:
+adopter_id: name: age_months: status: Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+Enter the values for each parameter:
+adopter_id: name: age_months: status: Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in adopters are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its adopter_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+no owner or owned pets
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in adopters are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its adopter_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit
+Select an operation by typing it.
+Available operations in pets are:
+- show_all
+- find
+- update
+- add_new
+- delete
+- choose
+- clear
+- exit
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+choose an operation: (type the number)
+1. display
+2. display owner / owned pets
+3. update
+4. delete
+Search in... (type the number)
+1. pets
+2. adopters
+3. exit

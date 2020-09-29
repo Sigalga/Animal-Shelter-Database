@@ -1,0 +1,3 @@
+3 status inshelter
+3 status adopted
+f 0 abc 3 status single

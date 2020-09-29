@@ -1,0 +1,18 @@
+no owner or owned pets
+choose an entry and enter its pet_id
+choose an entry and enter its adopter_id
+choose an entry and enter its pet_id
+wrong id number.
+to try again, press r.
+to go back, press any key.
+choose an entry and enter its pet_id
+wrong id number.
+to try again, press r.
+to go back, press any key.
+choose an entry and enter its pet_id
+wrong id number.
+to try again, press r.
+to go back, press any key.
+choose an entry and enter its pet_id
+choose an entry and enter its pet_id
+no owner or owned pets

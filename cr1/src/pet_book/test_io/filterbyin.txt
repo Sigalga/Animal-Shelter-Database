@@ -1,0 +1,6 @@
+name Luna age_months 20
+status adopted name Luna
+status adopted name Lu
+status adopted name 00000
+status adopted bad_param Luna
+status adopted name i age_months 3 name a

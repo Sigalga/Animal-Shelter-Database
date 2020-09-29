@@ -1,0 +1,6 @@
+name Luna
+name 5
+6 2
+age_months -r 0 15
+age_months -r 15 0
+name -r b l

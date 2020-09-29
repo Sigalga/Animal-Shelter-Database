@@ -1,0 +1,50 @@
+exit
+1 show_all exit
+0
+100
+-1
+ 
+text
+1 exit
+1 flylikesuperman makewinefromwater exit
+
+1 find name Luna exit
+1 find name 5
+1 find 6 2
+1 find age_months -r 0 15
+1 find age_months -r 15 0
+1 find name -r b l
+
+1 find name Luna filter age_months 20
+1 find status adopted filter name Luna
+1 find status adopted filter name Lu
+1 find status adopted filter name 00000
+1 find status adopted filter bad_param Luna
+1 find status adopted filter name i filter age_months 3 filter name a
+
+1 find status adopted order age_months DESC
+
+1 update 3 status inshelter
+1 update 3 status adopted
+1 update f 0 abc 3 status single
+1 choose 3 3 status inshelter
+1 choose 3 3 status adopted
+1 choose f 0 abc 3 3 status single
+
+1 add_new 100 Shushu 5 inshelter
+1 add_new 0 0 0 0
+1 add_new abc 123 xyz 456
+
+1 choose 101 4
+1 choose abc 4
+1 delete 101
+1 delete abc
+
+1 choose 3 2
+2 choose 2 2
+1 choose 0000 abc 8 2
+1 choose 1 2
+
+2 choose 2 1
+1 choose 3 1
+1 choose 0 000 1 1
