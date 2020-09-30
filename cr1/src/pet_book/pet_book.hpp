@@ -168,7 +168,10 @@ private:
     // A rule phrase for a query, to follow a start phrase
     const string& GetRule(const string& col, const string& val, const string& val2);
     //
-    // Sets currId to a user input
+    // Calls SetCurrId() and displays an option menu in case of wrong input 
+    void ChooseId();
+    //
+    // Sets currId to a user input. If input is invalid, sets to "".
     void SetCurrId();
     //
     // Gets the foreign key value of an entry identified by currId

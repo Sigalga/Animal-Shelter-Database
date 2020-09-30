@@ -1,11 +1,14 @@
 exit
+
 1 show_all exit
+
 0
 100
 -1
  
 text
 1 exit
+
 1 flylikesuperman makewinefromwater exit
 
 1 find name Luna exit
@@ -26,25 +29,25 @@ text
 
 1 update 3 status inshelter
 1 update 3 status adopted
-1 update f 0 abc 3 status single
+1 update f r 0 r abc r 3 status single
 1 choose 3 3 status inshelter
 1 choose 3 3 status adopted
-1 choose f 0 abc 3 3 status single
+1 choose f r 0 r abc r 3 3 status single
 
 1 add_new 100 Shushu 5 inshelter
 1 add_new 0 0 0 0
 1 add_new abc 123 xyz 456
 
 1 choose 101 4
-1 choose abc 4
+1 choose 0 r abc r 5 4
 1 delete 101
-1 delete abc
+1 delete 0 r abc r 5
 
 1 choose 3 2
 2 choose 2 2
-1 choose 0000 abc 8 2
+1 choose 0000 r abc r 8 2
 1 choose 1 2
 
 2 choose 2 1
 1 choose 3 1
-1 choose 0 000 1 1
+1 choose 0 r 000 r 1 1

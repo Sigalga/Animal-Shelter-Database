@@ -1,3 +1,8 @@
 choose an entry and enter its pet_id
 choose an entry and enter its pet_id
-choose an entry and enter its pet_id
+wrong id number. to try again, press r.
+to go back, press any key.
+enter a valid pet_id
+wrong id number. to try again, press r.
+to go back, press any key.
+enter a valid pet_id

@@ -15,9 +15,15 @@ Enter the parameter to search by or modify. options are:
 - status
 Enter a new value for the parameter
 choose an entry and enter its pet_id
-choose an entry and enter its pet_id
-choose an entry and enter its pet_id
-choose an entry and enter its pet_id
+wrong id number. to try again, press r.
+to go back, press any key.
+enter a valid pet_id
+wrong id number. to try again, press r.
+to go back, press any key.
+enter a valid pet_id
+wrong id number. to try again, press r.
+to go back, press any key.
+enter a valid pet_id
 Enter the parameter to search by or modify. options are:
 - pet_id
 - adopter_id

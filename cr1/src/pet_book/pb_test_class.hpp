@@ -37,7 +37,6 @@ private:
     size_t MakeFindJoinedTest();
     size_t MakeFindCurrIdTest();
 
-
     // StringFunc Tests //////////////
     size_t ExitTest();
     size_t ClearSearchTest();

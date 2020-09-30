@@ -82,7 +82,7 @@ static const vector<PetBook::Key> CHOICE_OPER_NAMES =
     OPER_NAMES[5]   // delete
 };
 
-/////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
 
 PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
     :   con(con), stringGen(stringGen)
@@ -319,7 +319,7 @@ ResultSet* PetBook::GetFields()
     return fields;
 }
 
-// StringFuncs /////////////////////////////////////////////////////////////
+// StringFuncs ////////////////////////////////////////////////////
 const string& PetBook::Exit()
 {
     isRunning = false;
@@ -419,88 +419,86 @@ const string& PetBook::ChooseEntry()
     currId = "";
     while ("" == currId)
     {
-        currId = "";
-        while ("" == currId)
-        {
-            SetCurrId();
-        }
+        ChooseId();
     }
 
-    currQuery = "choose";
-
-    // display menu
-    cout << "choose an operation: (type the number)" << endl;
-    size_t i = 0;
-    for (auto name : CHOICE_OPER_NAMES)
+    if ("" == currId)   // no valid id is chosen
     {
-        cout << ++i << ". " << name << endl;
+        currQuery = "";
     }
+    else
+    {
+        currQuery = "choose";
 
-    // receive choice and execute
-    size_t key = 0;
-    cin >> key;
-    stringGen->GenerateString(CHOICE_OPER_NAMES[key - 1]);
+        // display menu
+        cout << "choose an operation: (type the number)" << endl;
+        size_t i = 0;
+        for (auto name : CHOICE_OPER_NAMES)
+        {
+            cout << ++i << ". " << name << endl;
+        }
+
+        // receive choice and execute
+        size_t key = 0;
+        cin >> key;
+        stringGen->GenerateString(CHOICE_OPER_NAMES[key - 1]);
+    }
 
     return currQuery;
 }
 
 const string& PetBook::FindJoined()
 {
-    // choose a single entry, if not chosen
+    bool abortQuery = false;
+
+    // choose a single entry, if not already chosen
     if ("choose" != currQuery)
     {
-        currId = "";
-        SetCurrId();
-        while ("" == currId)
+        ChooseId();
+    }
+
+    if ("" == currId)   // no valid id is chosen
+    {
+        abortQuery = true;
+    }
+    else
+    {
+        // extract the foreign key value of the chosen entry
+        const string foreignKey = GetCurrFKVal();
+
+        if ("" == foreignKey)   // entry has no foreign key value
         {
-            cout << "wrong id number.\n"
-                << "to try again, press r.\n"
-                << "to go back, press any key."
-                << endl;
-                
-            string key;
-            cin >> key;
-            if ("r" == key)
+            cout << "no owner or owned pets" << endl;
+            currId = "";
+            abortQuery = true;
+        }
+        else
+        {
+            // identify as a query for result display
+            currId = "query";
+
+            // choose an adopter's adopter_id and show all its pets
+            if ("adopters" == currTable)
             {
-                SetCurrId();
+                SetDataTable("pets");
+                currQuery = "SELECT * FROM pets WHERE " + FK + "=" + foreignKey;
             }
+            // choose a pet's adopter_id and show that adopter
+            else if ("pets" == currTable)
+            {
+                SetDataTable("adopters");
+                currQuery = "SELECT * FROM adopters WHERE " + FK + "=" + foreignKey;
+            }
+            // default option
             else
             {
-                currQuery = "";
-                return currQuery;
+                abortQuery = true;
             }
         }
     }
 
-    // extract the foreign key value of the chosen entry
-    const string foreignKey = GetCurrFKVal();
-
-    // if entry has no foreign key value
-    if ("" == foreignKey)
-    {
-        cout << "no owner or owned pets" << endl;
-
-        currQuery = "";
-        return currQuery;
-    }
-
-    // identify as a query for result display
-    currId = "query";
-
-    // choose an adopter's adopter_id and showing all its pets
-    if ("adopters" == currTable)
-    {
-        SetDataTable("pets");
-        currQuery = "SELECT * FROM pets WHERE " + FK + "=" + foreignKey;
-    }
-    // choose a pet's adopter_id and show that adopter
-    else if ("pets" == currTable)
-    {
-        SetDataTable("adopters");
-        currQuery = "SELECT * FROM adopters WHERE " + FK + "=" + foreignKey;
-    }
-    // default option
-    else
+    // cleanup
+    if (abortQuery)
     {
         currQuery = "";
     }
@@ -520,24 +518,28 @@ const string& PetBook::UpdateField()
     // choose a single entry, if not chosen
     if ("choose" != currQuery)
     {
-        currId = "";
-        while ("" == currId)
-        {
-            SetCurrId();
-        }
+        ChooseId();
     }
 
-    // enter column to update
-    DisplayFieldMenu();
-    string col("");
-    cin >> col;
+    if ("" == currId)   // no valid id is chosen
+    {
+        currQuery = "";
+    }
+    else
+    {
+        // enter column to update
+        DisplayFieldMenu();
+        string col("");
+        cin >> col;
 
-    // enter new value
-    cout << "Enter a new value for the parameter" << endl;
-    string val("");
-    cin >> val;
+        // enter new value
+        cout << "Enter a new value for the parameter" << endl;
+        string val("");
+        cin >> val;
+        
+        currQuery = ("UPDATE " + currTable + " SET " + col + "='" + val + "' WHERE " + currPK + "=" + currId + ";");
+    }
     
-    currQuery = ("UPDATE " + currTable + " SET " + col + "='" + val + "' WHERE " + currPK + "=" + currId + ";");
     return currQuery;
 }
 
@@ -599,14 +601,19 @@ const string& PetBook::RemoveEntry()
     // choose a single entry, if not chosen
     if ("choose" != currQuery)
     {
-        currId = "";
-        while ("" == currId)
-        {
-            SetCurrId();
-        }
+        ChooseId();
+    }
+
+    if ("" == currId)   // no valid id is chosen
+    {
+        currQuery = "";
+    }
+    else
+    {
+        currQuery = ("DELETE FROM " + currTable + " WHERE " +
+                        currPK + "=" + currId + ";");        
     }
     
-    currQuery = ("DELETE FROM " + currTable + " WHERE " + currPK + "=" + currId + ";");
     return currQuery;
 }
 
@@ -626,7 +633,7 @@ const string& PetBook::FindByMaxId()
     return stmtString; 
 }
 
-// Helper functions ////////////////////////////////////////////////////////
+// Helper functions ///////////////////////////////////////////////
 const string& PetBook::GetRule(const string& col, const string& val, const string& val2)
 {
     if (isNum(val))
@@ -681,11 +688,35 @@ const string& PetBook::SelectDataAsc()
     return stmtString;
 }
 
-void PetBook::SetCurrId()
+void PetBook::ChooseId()
 {
     // receive an id for a single entry
     cout << "choose an entry and enter its " << currPK << endl;
-    // cin >> currId;
+
+    currId = "";
+    SetCurrId();
+    while ("" == currId)
+    {
+        cout << "wrong id number. to try again, press r.\n"
+            << "to go back, press any key."
+            << endl;
+            
+        string key;
+        cin >> key;
+        if ("r" == key)
+        {
+            cout << "enter a valid " << currPK << endl;
+            SetCurrId();
+        }
+        else
+        {
+            return ;
+        }
+    }
+}
+
+void PetBook::SetCurrId()
+{
     string id;
     cin >> id;
 

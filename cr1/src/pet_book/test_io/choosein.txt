@@ -1,4 +1,6 @@
 2 1
 2 2
 2 3 age_months 60
+0 r
+abc r
 2 4

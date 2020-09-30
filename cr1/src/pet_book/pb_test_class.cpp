@@ -43,6 +43,8 @@ static void CheckForErrors(size_t errors, size_t* sumErrors);
 static void RedirectToFile(ifstream* in, ofstream* out);
 static void ResetToCio();
 static void PrtStrToTerm(ifstream* in, ofstream* out, const string& str);
+static void CheckForErrorsToTerm (const string& testTitle,
+            size_t errors, size_t* sumErrors, ifstream* in, ofstream* out);
 
 // expected return values
 static const string exitRetval = "exit";
@@ -102,13 +104,13 @@ static const vector<string> orderByQueries =
 
 static const vector<string> updateQueries =
 {
-    // input: 3 status inshelter
+    // input: pk = 3, col = status, val = inshelter
     "UPDATE pets SET status='inshelter' WHERE pet_id=3;",
 
-    // input: 3 status adopted
+    // input: pk = 3, col = status, val = adopted
     "UPDATE pets SET status='adopted' WHERE pet_id=3;",
 
-    // input: f 0 abc 3 status single
+    // input: pk = f, pk = 0, pk = abc, pk = 3, col = status, val = single
     "UPDATE pets SET status='single' WHERE pet_id=3;"
 };
 
@@ -131,9 +133,8 @@ static const vector<vector<string> > removeChoiceQueries =
     // correct currId fed to instance
     { "pets",   "100",  "DELETE FROM pets WHERE pet_id=100;"    },
 
-    // incorrect currId fed to instance
-    { "pets",   "",     "DELETE FROM pets WHERE pet_id=;"       },
-    // { "pets",   "query",    "DELETE FROM pets WHERE pet_id=query;"  },
+    // no currId fed to instance
+    { "pets",   "",         ""  }
 };
 
 static const vector<string> removeQueries =
@@ -141,22 +142,22 @@ static const vector<string> removeQueries =
     // input: pk = 101
     "DELETE FROM pets WHERE pet_id=101;",
 
-    // input: pk = abc, pk = 5
+    // input: pk = 000, pk = abc, pk = 5
     "DELETE FROM pets WHERE pet_id=5;"
 };
 
 static const vector<string> chooseQueries =
 {
-    // input: 2 1
+    // input: pk = 2, operation = 1
     "SELECT * FROM pets WHERE pet_id=2",
 
-    // input: 2 2
+    // input: pk = 2, operation = 2
     "SELECT * FROM adopters WHERE adopter_id=2",
 
-    // input: 2 3 age_months 60
+    // input: pk = 2, operation = 3, col = age_months, val = 60
     "UPDATE pets SET age_months='60' WHERE pet_id=2;",
 
-    // input: 2 4
+    // input: pk = , pk = abc, pk = 2, operation = 4
     "DELETE FROM pets WHERE pet_id=2;"
 };
 
@@ -207,7 +208,7 @@ void PbTestClass::PublicMethodsTest()
 {
     cout << "-- PublicMethodsTest():" << endl;
 
-	size_t sumErrors = 0;
+	size_t errors = 0;
 
     cout << "---- StartTest(): " << endl;
     StartTest();
@@ -217,85 +218,97 @@ void PbTestClass::PublicMethodsTest()
 
     cout << "---- SetDatabaseTest(): " << endl;
     SetDatabaseTest();
+
+    cout << "-- Public Methods sum-up: ";
+    CheckForErrors(errors, NULL);
+    cout << endl;
 }
 
 void PbTestClass::PrivateMethodsTest()
 {
     cout << "-- PrivateMethodsTest():" << endl;
 
-	size_t sumErrors = 0;
+	size_t errors = 0;
 
 	cout << "---- MakeStringTest(): ";
-	CheckForErrors(MakeStringTest(), &sumErrors);
+	CheckForErrors(MakeStringTest(), &errors);
 
 	// cout << "---- ExecutInputTest(): ";
 	// CheckForErrors(ExecutInputTest(), &sumErrors);
+
+    cout << "-- Private Methods sum-up: ";
+    CheckForErrors(errors, NULL);
+    cout << endl;
 }
 
 void PbTestClass::StringFuncsTest()
 {
     cout << "-- StringFuncsTest(): " << endl;
 
-    size_t sumErrors = 0;
+    size_t errors = 0;
 
     cout << "---- ExitTest(): ";
-    CheckForErrors(ExitTest(), &sumErrors);
+    CheckForErrors(ExitTest(), &errors);
 
     cout << "---- ClearSearchTest(): ";
-    CheckForErrors(ClearSearchTest(), &sumErrors);
+    CheckForErrors(ClearSearchTest(), &errors);
 
     // Initial queries
 
     cout << "---- FindByTest(): ";
-    CheckForErrors(FindByTest(), &sumErrors);
+    CheckForErrors(FindByTest(), &errors);
 
     cout << "---- GetAllTest(): ";
-    CheckForErrors(GetAllTest(), &sumErrors); 
+    CheckForErrors(GetAllTest(), &errors); 
 
     // Secondary queries
 
     cout << "---- FilterByTest(): ";
-    CheckForErrors(FilterByTest(), &sumErrors);
+    CheckForErrors(FilterByTest(), &errors);
 
     cout << "---- OrderByTest(): ";
-    CheckForErrors(OrderByTest(), &sumErrors);
+    CheckForErrors(OrderByTest(), &errors);
 
     cout << "---- ChooseEntryTest(): ";
-    CheckForErrors(ChooseEntryTest(), &sumErrors);
+    CheckForErrors(ChooseEntryTest(), &errors);
 
     cout << "---- FindJoinedTest(): ";
-    CheckForErrors(FindJoinedTest(), &sumErrors);
+    CheckForErrors(FindJoinedTest(), &errors);
     
     // Editorial operations
 
     cout << "---- UpdateFieldTest(): ";
-    CheckForErrors(UpdateFieldTest(), &sumErrors);
+    CheckForErrors(UpdateFieldTest(), &errors);
 
     cout << "---- AddEntryTest(): ";
-    CheckForErrors(AddEntryTest(), &sumErrors);
+    CheckForErrors(AddEntryTest(), &errors);
 
     cout << "---- RemoveEntryTest(): ";
-    CheckForErrors(RemoveEntryTest(), &sumErrors);
+    CheckForErrors(RemoveEntryTest(), &errors);
 
     // Helper operations
 
     cout << "---- FindByCurrIdTest(): ";
-    CheckForErrors(FindByCurrIdTest(), &sumErrors); 
+    CheckForErrors(FindByCurrIdTest(), &errors); 
 
     cout << "---- FindByMaxIdTest(): ";
-    CheckForErrors(FindByMaxIdTest(), &sumErrors); 
+    CheckForErrors(FindByMaxIdTest(), &errors); 
 
     cout << "---- SelectDataTest(): ";
-    CheckForErrors(SelectDataTest(), &sumErrors); 
+    CheckForErrors(SelectDataTest(), &errors); 
 
     cout << "---- SelectDataWhereTest(): ";
-    CheckForErrors(SelectDataWhereTest(), &sumErrors); 
+    CheckForErrors(SelectDataWhereTest(), &errors); 
 
     cout << "---- SelectDataAscTest(): ";
-    CheckForErrors(SelectDataAscTest(), &sumErrors); 
+    CheckForErrors(SelectDataAscTest(), &errors); 
 
     cout << "---- GetRuleTest(): ";
-    CheckForErrors(GetRuleTest(), &sumErrors);
+    CheckForErrors(GetRuleTest(), &errors);
+
+    cout << "-- StringFuncs sum-up: ";
+    CheckForErrors(errors, NULL);
+    cout << endl;
 }
 
 // Public Method Tests /////////////////////////////////
@@ -389,40 +402,35 @@ size_t PbTestClass::MakeStringTest()
     errors += (instance->currQuery != exitRetval);
 
     // operation tests
-    PrtStrToTerm(&in, &out, "\n------ MakeFindTest()");
-    errors += MakeFindTest();
+    CheckForErrorsToTerm("\n------ MakeFindTest(): ",
+        MakeFindTest(), &errors, &in, &out);
 
-    PrtStrToTerm(&in, &out, "------ MakeFilterTest()");
-    errors += MakeFilterTest();
+    CheckForErrorsToTerm("------ MakeFilterTest(): ",
+        MakeFilterTest(), &errors, &in, &out);
 
-    PrtStrToTerm(&in, &out, "------ MakeOrderTest()");
-    errors += MakeOrderTest();
+    CheckForErrorsToTerm("------ MakeOrderTest(): ",
+        MakeOrderTest(), &errors, &in, &out);
 
-    PrtStrToTerm(&in, &out, "------ MakeUpdateTest()");
-    errors += MakeUpdateTest();
+    CheckForErrorsToTerm("------ MakeUpdateTest(): ",
+        MakeUpdateTest(), &errors, &in, &out);
 
-    PrtStrToTerm(&in, &out, "------ MakeAddTest()");
-    errors += MakeAddTest();
+    CheckForErrorsToTerm("------ MakeAddTest(): ",
+        MakeAddTest(), &errors, &in, &out);
 
-    PrtStrToTerm(&in, &out, "------ MakeRemoveTest()");
-    errors += MakeRemoveTest();
+    CheckForErrorsToTerm("------ MakeRemoveTest(): ",
+        MakeRemoveTest(), &errors, &in, &out);
 
-    PrtStrToTerm(&in, &out, "------ MakeFindJoinedTest()");
-    errors += MakeFindJoinedTest();
+    CheckForErrorsToTerm("------ MakeFindJoinedTest(): ",
+        MakeFindJoinedTest(), &errors, &in, &out);
 
-    PrtStrToTerm(&in, &out, "------ MakeFindCurrIdTest()");
-    errors += MakeFindCurrIdTest();
-
-    // cout << instance->currQuery << endl;
+    CheckForErrorsToTerm("------ MakeFindCurrIdTest(): ",
+        MakeFindCurrIdTest(), &errors, &in, &out);
 
     ResetToCio();
 
-
     // TO DO:
     // - order by concatenation
-    // - clear
-
-
+    cout << "---- MakeString() sum-up: ";
     return errors;
 }
 
@@ -575,7 +583,6 @@ size_t PbTestClass::MakeFindJoinedTest()
         instance->currId = "";
         instance->MakeString();
         errors += (test.at(2) != instance->currQuery);
-
     }
 
     return errors;
@@ -583,10 +590,6 @@ size_t PbTestClass::MakeFindJoinedTest()
 
 size_t PbTestClass::MakeFindCurrIdTest()
 {
-// size_t i = 0;
-// ResetToCio();
-// cout << ++i << " " << instance->currQuery << endl;
-
     size_t errors = 0;
 
     for (auto query : FindCurrIdQueries)
@@ -874,21 +877,38 @@ size_t PbTestClass::GetRuleTest()
     return 0;
 }
 
-////////////////////////////////////////////////////
-
+// Testing Helper functions /////////////////////////////////////////////////
 static void CheckForErrors(size_t errors, size_t* sumErrors)
 {
     if (errors)
     {
         cout << errors << " errors";
+
+        if (NULL != sumErrors)
+        {
+            ++(*sumErrors);
+        }
+    }
+    else
+    {
+        cout << "-";
+    }
+    
+    cout << endl;
+}
+
+static void CheckForErrorsToTerm (const string& testTitle,
+        size_t errors, size_t* sumErrors, ifstream* in, ofstream* out)
+{
+    if (errors)
+    {
+        PrtStrToTerm(in, out, testTitle + (errors + " errors"));
         ++(*sumErrors);
     }
     else
     {
-        cout << "success";
+        PrtStrToTerm(in, out, testTitle + "-");
     }
-    
-    cout << endl;
 }
 
 static void RedirectToFile(ifstream* in, ofstream* out)
