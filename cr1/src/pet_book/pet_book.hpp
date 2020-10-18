@@ -3,6 +3,7 @@
 
 // Standard C++ includes
 #include <vector>
+#include <memory>	// smart ptrs
 
 // MySQL/C++ Connector includes
 #include <cppconn/connection.h>     // sql::Connection
@@ -11,26 +12,28 @@
 // ASHS includes
 #include "stmt_string_generator.hpp"
 
-using namespace sql;
-using namespace std;
-
 namespace ashs
 {
 
-static const string PET_BOOK_DB("pet_book");
-static const string DEFAULT_TABLE("pets");
+static const std::string PET_BOOK_DB("pet_book");
+static const std::string DEFAULT_TABLE("pets");
 
 class PetBook
 {
 public:
-    using Key = StmtStringGenerator::Key;
-    using StringFunc = StmtStringGenerator::StringFunc;
+    using Key =         StmtStringGenerator::Key;
+    using StringFunc =  StmtStringGenerator::StringFunc;
 
-    PetBook(Connection* con, StmtStringGenerator* stringGen);
+    PetBook(std::shared_ptr<sql::Connection> con,
+            std::shared_ptr<StmtStringGenerator> strGenSmart);
+    
     ~PetBook() { delete fields; }
 
+    PetBook(const PetBook&) = delete;
+    PetBook& operator=(const PetBook&) = delete;
+
     // Sets an SQL database
-    void SetDatabase(const string& db) { petBookDB = db; }
+    void SetDatabase(const std::string& db) { petBookDB = db; }
 
     // Starts the interactive io loop, which allowes the user
     // to send queries and actions to the SQL database
@@ -40,19 +43,22 @@ public:
     void Stop() { isRunning = false; }
 
 private:
-    Connection* con;                    // connection to an SQL server database
-    StmtStringGenerator* stringGen;     // a shared statement string generator
-    string petBookDB = PET_BOOK_DB;     // name of the SQL database
-    bool isRunning = false;             // interactive ui switch
-    string currTable = DEFAULT_TABLE;   // name of the current datatable choice
-    string currPK = "";                 // name of primary key field for current datatable
-    string currId = "";                 // pk value for entry-specific operations, otherwise "query"/"new_id"/empty
-    string currQuery = "";              // for secondary operations concatenation
-    string stmtString = "";             // for stringFuncs
-    ResultSet* fields = GetFields();    // current datatable's field names
+    // animal shelter system resources
+    std::shared_ptr<sql::Connection> con;   // ashs connection to an SQL server database
+    std::shared_ptr<StmtStringGenerator> stringGen; // ashs statement string generator
+    
+    // petbook resources
+    std::string petBookDB = PET_BOOK_DB;    // name of the SQL database
+    bool isRunning = false;                 // interactive ui switch
+    std::string currTable = DEFAULT_TABLE;  // name of the current datatable choice
+    std::string currPK = "";                // name of primary key field for current datatable
+    std::string currId = "";                // pk value for entry-specific operations, otherwise "query"/"new_id"/empty
+    std::string currQuery = "";             // for secondary operations concatenation
+    std::string stmtString = "";            // for stringFuncs
+    sql::ResultSet* fields = GetFields();   // current datatable's field names
 
     // Setters /////////////////////////////////////////////////////////////////
-    void SetDataTable(const string& table);
+    void SetDataTable(const std::string& table);
 
     // Extracts the primary key field name from current datatable choice
     void SetCurrPK();
@@ -81,32 +87,32 @@ private:
     void DisplayFieldMenu();
 
     // Gets the names of table's fields
-    ResultSet* GetFields();
+    sql::ResultSet* GetFields();
 
     // Result Displayers ///////////////////////////////////////////////////////
-    // Prints a database resultset for a query
-    void DisplayResults(ResultSet* res);
+    // Prints a database ResultSet for a query
+    void DisplayResults(sql::ResultSet* res);
 
     // Gets the Resultset for a recently edited/added entry
-    ResultSet* GetEditResult();
+    sql::ResultSet* GetEditResult();
 
     // Prints a Resultset in a table view by <fields>
-    void PrintTable(ResultSet* res);
+    void PrintTable(sql::ResultSet* res);
 
     // StringFuncs /////////////////////////////////////////////////////////////
     // Exists PetBook
-    const string& Exit();             
+    const std::string& Exit();             
     
     // Starts a new search in the database
-    const string& ClearSearch();
+    const std::string& ClearSearch();
     
     // Initial queries ///////////////////////////////////////
     //
     // Searches table by a field and a value, or a range of values
-    const string& FindBy();
+    const std::string& FindBy();
     //
     // Fetches all table entries in an ascending pk order
-    const string& GetAll();
+    const std::string& GetAll();
     //
     //////////////////////////////////////////////////////////
 
@@ -115,21 +121,21 @@ private:
     //
     // Filters an existing serach result set by a field and a value,
     // or a range of values
-    const string& FilterBy();
+    const std::string& FilterBy();
     //
     // Orders an existing serach result set by a field's value,
     // either in an ascending or descending order
-    const string& OrderBy();
+    const std::string& OrderBy();
     //
-    const string& ChooseEntry();
+    const std::string& ChooseEntry();
     //
     // Receives an adopter id to show all of its pets,
     // or a pet id to show its adopter
-    const string& FindJoined();
+    const std::string& FindJoined();
     //
     // Presents a single, currently chosen entry,
     // which had been chosen with ChooseEntry().
-    const string& FindCurrChoice();
+    const std::string& FindCurrChoice();
     //
     //////////////////////////////////////////////////////////
 
@@ -137,36 +143,36 @@ private:
     // Clear the search when done, and display modified item
     //
     // Replaces current field value with a new input value
-    const string& UpdateField();
+    const std::string& UpdateField();
     //
     // Adds a new table entry with input values
-    const string& AddEntry();
+    const std::string& AddEntry();
     //
     // Removes a table entry by its identifier
-    const string& RemoveEntry();
+    const std::string& RemoveEntry();
     //
     //////////////////////////////////////////////////////////
     
     // Helper operations /////////////////////////////////////
     //
     // Rereives the entry most recently edited by PetBook
-    const string& FindByCurrId();
+    const std::string& FindByCurrId();
     //
     // Rereives the entry most recently added to the table
-    const string& FindByMaxId();
+    const std::string& FindByMaxId();
     //
     // A query start phrase, retreives all table data
-    const string& SelectData();
+    const std::string& SelectData();
     //
     // A query start phrase, to be followed by a rule
-    const string& SelectDataWhere();
+    const std::string& SelectDataWhere();
     //
     // A query start phrase, retreives all table data
     // ordered by its pk in an ascending order
-    const string& SelectDataAsc();
+    const std::string& SelectDataAsc();
     //
     // A rule phrase for a query, to follow a start phrase
-    const string& GetRule(const string& col, const string& val, const string& val2);
+    const std::string& GetRule(const std::string& col, const std::string& val, const std::string& val2);
     //
     // Calls SetCurrId() and displays an option menu in case of wrong input 
     void ChooseId();
@@ -175,7 +181,7 @@ private:
     void SetCurrId();
     //
     // Gets the foreign key value of an entry identified by currId
-    const string& GetCurrFKVal();
+    const std::string& GetCurrFKVal();
     //
     //////////////////////////////////////////////////////////
 

@@ -12,11 +12,6 @@
 #include "pet_book.hpp"
 #include "stmt_string_generator.hpp"
 
-//! SF.7: Don’t write using namespace at global scope in a header file
-//! https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rs-using-directive
-using namespace sql;
-using namespace std;
-
 namespace ashs
 {
 
@@ -24,20 +19,27 @@ class AnimalShelterSystem
 {
 public:
     AnimalShelterSystem();
-    ~AnimalShelterSystem();
 
 private:
-    mysql::MySQL_Driver* driver;
-    Connection* con;
-
-    StmtStringGenerator* pbStringGen;
+    sql::mysql::MySQL_Driver* driver;
+    std::shared_ptr<sql::Connection> con;   // connection to an SQL server database
+    std::shared_ptr<StmtStringGenerator> pbStringGen; // statement string generator
     PetBook petBook;
 
-    Connection* SetConnection();
-    Connection* SetConnection(const string& password);
+    // Establishes and returns an SQL database connection
+    // using defult parameters and server password
+    sql::Connection* SetConnection(const std::string& password);
 
-    void Init();
+    // Establishes and returns an SQL database connection
+    // using defult parameters and user input server password
+    sql::Connection* SetConnection();
+
+    // Starts the interactive ui loop,
+    // which may be stopped in response to user input
     void Start();
+
+    // Prints a welcome message and an operation menu
+    // for the interactive ui
     void DisplayMenu();
 };
 

@@ -202,6 +202,26 @@ static const vector<vector<string> > getRuleParams =
     { "textnum",    "0678abc",  "",         "textnum LIKE '%0678abc%'"  }
 };
 
+static const vector<string> execInputQueries =
+{
+    // datatable choice test
+    "exit", // input: datatable = 1, operation = exit
+    "exit", // input: datatable = 2, operation = exit
+    "exit", // input: datatable = 3 (exit)
+
+    // operation choice test
+    // // show_all
+    "SELECT * FROM pets ORDER BY pet_id ASC", "exit",
+
+
+    // // find
+    "SELECT * FROM adopters WHERE name LIKE '%Napoleon%'",  
+    "SELECT * FROM pets WHERE age_months LIKE '%old%'",
+    "SELECT * FROM pets WHERE age_months=6",
+    "SELECT * FROM pets WHERE age_months BETWEEN 0 AND 15",
+    "SELECT * FROM pets WHERE age_months BETWEEN 15 AND 0",
+};
+
 // Tests ///////////////////////////////////////////////
 
 void PbTestClass::PublicMethodsTest()
@@ -233,8 +253,8 @@ void PbTestClass::PrivateMethodsTest()
 	cout << "---- MakeStringTest(): ";
 	CheckForErrors(MakeStringTest(), &errors);
 
-	// cout << "---- ExecutInputTest(): ";
-	// CheckForErrors(ExecutInputTest(), &sumErrors);
+	cout << "---- ExecutInputTest(): ";
+	CheckForErrors(ExecutInputTest(), &errors);
 
     cout << "-- Private Methods sum-up: ";
     CheckForErrors(errors, NULL);
@@ -338,31 +358,26 @@ void PbTestClass::SetDatabaseTest()
 // Private Method Tests ////////////////////////////////
 size_t PbTestClass::ExecutInputTest()
 {
-    ifstream in(EXEC_INP_IN);
-	ofstream out(EXEC_INP_OUT);
-    RedirectToFile(&in, &out);
+    // ifstream in(EXEC_INP_IN);
+	// ofstream out(EXEC_INP_OUT);
+    // RedirectToFile(&in, &out);
 
     size_t errors = 0;
 
-    // input: 1 exit
-    instance->isRunning = true;
     instance->currQuery = "";
-    instance->ExecuteInput();
-    errors += ("exit" != instance->currQuery);
+    instance->currId = "";
 
-    // input: 2 exit
-    instance->isRunning = true;
-    instance->currQuery = "";
-    instance->ExecuteInput();
-    errors += ("exit" != instance->currQuery);
+    // for (size_t i = 0; i < 5; i++)
+    // {
+        cout << instance->currQuery << endl;
+        cout << "\n new execinp" << endl;
 
-    // input:3
-    instance->isRunning = true;
-    instance->currQuery = "";
-    instance->ExecuteInput();
-    errors += ("exit" != instance->currQuery);
+        instance->isRunning = true;
+        instance->ExecuteInput();
+        errors += (false != instance->isRunning);
+    // }
 
-    ResetToCio();
+    // ResetToCio();
 
     return errors;
 }

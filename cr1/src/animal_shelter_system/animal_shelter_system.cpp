@@ -7,8 +7,10 @@ namespace ashs
 {
 
 // default values
-static const string urlDef("tcp://127.0.0.1:3306");
-static const string userDef("root");
+static const string URL_DEF("tcp://127.0.0.1:3306");
+static const string USER_DEF("root");
+
+// Methods ////////////////////////////////////////////////////////////////////////
 
 AnimalShelterSystem::AnimalShelterSystem()
     :   driver(sql::mysql::get_mysql_driver_instance()),
@@ -16,7 +18,7 @@ AnimalShelterSystem::AnimalShelterSystem()
         pbStringGen(new StmtStringGenerator),
         petBook(con, pbStringGen)
 {
-    Init();
+    Start();
 }
 
 Connection* AnimalShelterSystem::SetConnection()
@@ -24,33 +26,23 @@ Connection* AnimalShelterSystem::SetConnection()
     string pass;
     cout << "Please enter password: ";
     cin >> pass;
-    return driver->connect(urlDef, userDef, pass);
+    return driver->connect(URL_DEF, USER_DEF, pass);
 }
 
 Connection* AnimalShelterSystem::SetConnection(const string& password)
 {
-    return driver->connect(urlDef, userDef, password);
+    return driver->connect(URL_DEF, USER_DEF, password);
 }
 
-void AnimalShelterSystem::Init()
-{
-    Start();
-}
-
-//!* Strings can be compared directly with c-strings.
-//!* See https://godbolt.org/z/jrGonz for an example
-//!* and https://en.cppreference.com/w/cpp/string/basic_string/operator_cmp for documentation
 void AnimalShelterSystem::Start()
 {
     DisplayMenu();
 
     string query;
-    // while (0 != query.compare("q"))
     while ("q" != query)
     {
         getline(cin, query);
 
-        // if (0 == query.compare("p"))
         if ("p" == query)
         {
             petBook.Start();
@@ -65,12 +57,6 @@ void AnimalShelterSystem::DisplayMenu()
     << "To exit, press q\n"
     << "To access the PetBook, press p"
     << endl;
-}
-
-AnimalShelterSystem::~AnimalShelterSystem()
-{
-	delete pbStringGen;
-    delete con;
 }
 
 } // namespace ashs

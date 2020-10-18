@@ -1,5 +1,18 @@
-1
-exit
-2
-exit
+1 exit
+2 exit
+4
+0
+fds
+12
+000
 3
+
+1 show_all exit
+
+show_all filter status adopted clear
+
+2 find name Napoleon
+1 find age_months old
+1 find age_months 6
+1 find age_months -r 0 15
+1 find age_months -r 15 0

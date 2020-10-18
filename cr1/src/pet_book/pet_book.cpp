@@ -84,8 +84,18 @@ static const vector<PetBook::Key> CHOICE_OPER_NAMES =
 
 ///////////////////////////////////////////////////////////////////
 
-PetBook::PetBook(Connection* con, StmtStringGenerator* stringGen)
-    :   con(con), stringGen(stringGen)
+// PetBook::PetBook(Connection* con,
+//         shared_ptr<StmtStringGenerator> strGenSmart)
+//     :   con(con), stringGen(strGenSmart)
+// {
+// 	con->setSchema(petBookDB);
+//     SetCurrPK();
+//     InitStringGen();
+// }
+
+PetBook::PetBook(shared_ptr<Connection> con,
+        shared_ptr<StmtStringGenerator> strGenSmart)
+    :   con(con), stringGen(strGenSmart)
 {
 	con->setSchema(petBookDB);
     SetCurrPK();
@@ -172,6 +182,7 @@ void PetBook::MakeString()
         if (NO_TABLE_IDX == i)
         {
             Exit();
+            return ;
         }
         else
         {
@@ -270,7 +281,8 @@ void PetBook::DisplayOperMenu()
     cout << "Select an operation by typing it.\n"
     << "Available operations in " << currTable << " are:" << endl;
 
-    if ("" == currId)   // new search
+    if ("" == currId ||         // entirely new search
+        "exit" == currQuery)    // new primary oper in same datatable
     {
         for (auto name : INIT_OPER_NAMES)
         {
@@ -663,7 +675,6 @@ const string& PetBook::GetRule(const string& col, const string& val, const strin
                                 "' OR " + col + " LIKE '%" + val2 + "%'");
         }
     }
-
 
     return stmtString;
 }
