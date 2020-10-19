@@ -14,11 +14,16 @@ CREATE TABLE `pets` (
 ALTER TABLE `pets` AUTO_INCREMENT=1;
 
 # inserting new entries
-INSERT INTO `pets` VALUES (1,NULL,'Dummy',0,'in shelter');
+INSERT INTO `pets` VALUES (1,NULL,'Dummy',0,'in_shelter');
 
-# fixing autoincrement id column
-SET @m = (SELECT MAX(pet_id) + 1 FROM pets); 
-SET @s = CONCAT('ALTER TABLE pets AUTO_INCREMENT=', @m);
-PREPARE stmt1 FROM @s;
-EXECUTE stmt1;
-DEALLOCATE PREPARE stmt1;
+CREATE TABLE `adopters` (
+  `adopter_id` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `phone` int(11) ,
+  `email` varchar(50),
+  PRIMARY KEY (`adopter_id`)
+);
+
+# inserting new entries
+INSERT INTO `adopters` VALUES (1,'DummyMommy',1234567890,'alias@host.com');
+
