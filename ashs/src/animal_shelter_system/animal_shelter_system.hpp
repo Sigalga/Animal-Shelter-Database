@@ -23,7 +23,6 @@ public:
 private:
     sql::mysql::MySQL_Driver* driver;
     std::shared_ptr<sql::Connection> con;   // connection to an SQL server database
-    std::shared_ptr<StmtStringGenerator> pbStringGen; // statement string generator
     PetBook petBook;
 
     // Establishes and returns an SQL database connection

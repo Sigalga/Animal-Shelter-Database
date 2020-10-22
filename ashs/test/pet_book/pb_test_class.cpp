@@ -338,46 +338,34 @@ void PbTestClass::StartTest()
 	ofstream out(START_OUT);
     RedirectToFile(&in, &out);
 
-	instance->Start();
+	instance.Start();
 
 	ResetToCio();
 }
 
 void PbTestClass::StopTest()
 {
-    instance->Stop();
+    instance.Stop();
 }
 
 void PbTestClass::SetDatabaseTest()
 {
-    instance->SetDatabase("test_db");
+    instance.SetDatabase("test_db");
 
-    instance->Start();
+    instance.Start();
 }
 
 // Private Method Tests ////////////////////////////////
 size_t PbTestClass::ExecutInputTest()
 {
-    // ifstream in(EXEC_INP_IN);
-	// ofstream out(EXEC_INP_OUT);
-    // RedirectToFile(&in, &out);
-
     size_t errors = 0;
 
-    instance->currQuery = "";
-    instance->currId = "";
+    instance.currQuery = "";
+    instance.currId = "";
 
-    // for (size_t i = 0; i < 5; i++)
-    // {
-        cout << instance->currQuery << endl;
-        cout << "\n new execinp" << endl;
-
-        instance->isRunning = true;
-        instance->ExecuteInput();
-        errors += (false != instance->isRunning);
-    // }
-
-    // ResetToCio();
+    instance.isRunning = true;
+    instance.ExecuteInput();
+    errors += (false != instance.isRunning);
 
     return errors;
 }
@@ -392,29 +380,29 @@ size_t PbTestClass::MakeStringTest()
 
     // basic test
     // input: exit
-    instance->currId = "old_leftovers";
-    instance->MakeString();
-    errors += (instance->currQuery != exitRetval);
+    instance.currId = "old_leftovers";
+    instance.MakeString();
+    errors += (instance.currQuery != exitRetval);
 
     // new search test
     // input: 1 show_all exit
-    instance->currId = "";
-    instance->MakeString();
-    errors += (instance->currQuery != getAllQueries[0]);
-    instance->MakeString();
-    errors += (instance->currQuery != exitRetval);
+    instance.currId = "";
+    instance.MakeString();
+    errors += (instance.currQuery != getAllQueries[0]);
+    instance.MakeString();
+    errors += (instance.currQuery != exitRetval);
 
     // wrong input test (table choice)
     // input: 0 100 -1 [] text 1 exit
-    instance->currId = "";
-    instance->MakeString();
-    errors += (instance->currQuery != exitRetval);
+    instance.currId = "";
+    instance.MakeString();
+    errors += (instance.currQuery != exitRetval);
 
     // wrong input test (operation choice)
     // input: 1 flylikesuperman makewinefromwater exit
-    instance->currId = "";
-    instance->MakeString();
-    errors += (instance->currQuery != exitRetval);
+    instance.currId = "";
+    instance.MakeString();
+    errors += (instance.currQuery != exitRetval);
 
     // operation tests
     CheckForErrorsToTerm("\n------ MakeFindTest(): ",
@@ -457,9 +445,9 @@ size_t PbTestClass::MakeFindTest()
     // input: 1 find <params>
     for (auto query : findByQueries)
     {
-        instance->currId = "";
-        instance->MakeString();
-        errors += (query != instance->currQuery);
+        instance.currId = "";
+        instance.MakeString();
+        errors += (query != instance.currQuery);
     }
 
     return errors;
@@ -472,26 +460,26 @@ size_t PbTestClass::MakeFilterTest()
     // input: 1 find <params> filter <params>
     for (auto query : filterByQueries)
     {
-        instance->currId = "";
-        instance->currQuery = "";
+        instance.currId = "";
+        instance.currQuery = "";
 
-        instance->MakeString();     // find
-        instance->MakeString();     // filter
-        errors += (query != instance->currQuery);
+        instance.MakeString();     // find
+        instance.MakeString();     // filter
+        errors += (query != instance.currQuery);
     }
 
     // filter concatenation
     // input: 1 find <params> filter <params> filter <params> filter <params>
     for (auto query : filterConcatQueries)
     {
-        instance->currId = "";
-        instance->currQuery = "";
+        instance.currId = "";
+        instance.currQuery = "";
 
-        instance->MakeString();     // find
-        instance->MakeString();     // filter
-        instance->MakeString();     // filter
-        instance->MakeString();     // filter
-        errors += (query != instance->currQuery);
+        instance.MakeString();     // find
+        instance.MakeString();     // filter
+        instance.MakeString();     // filter
+        instance.MakeString();     // filter
+        errors += (query != instance.currQuery);
     }
 
     return errors;
@@ -504,12 +492,12 @@ size_t PbTestClass::MakeOrderTest()
     // input: 1 find <params> order <params>
     for (auto query : orderByQueries)
     {
-        instance->currId = "";
-        instance->currQuery = "";
+        instance.currId = "";
+        instance.currQuery = "";
 
-        instance->MakeString();     // find
-        instance->MakeString();     // order
-        errors += (query != instance->currQuery);
+        instance.MakeString();     // find
+        instance.MakeString();     // order
+        errors += (query != instance.currQuery);
     }
 
     return errors;
@@ -522,22 +510,22 @@ size_t PbTestClass::MakeUpdateTest()
     // input: 1 update <params>
     for (auto query : updateQueries)
     {
-        instance->currId = "";
-        instance->currQuery = "";
+        instance.currId = "";
+        instance.currQuery = "";
 
-        instance->MakeString();
-        errors += (query != instance->currQuery);
+        instance.MakeString();
+        errors += (query != instance.currQuery);
     }
 
     // parameters fed to instance by the "choose" operation
     //input: 1 choose <param> 3
     for (auto query : updateQueries)
     {
-        instance->currId = "";
-        instance->currQuery = "";
+        instance.currId = "";
+        instance.currQuery = "";
 
-        instance->MakeString();
-        errors += (query != instance->currQuery);
+        instance.MakeString();
+        errors += (query != instance.currQuery);
     }
 
     return errors;
@@ -550,11 +538,11 @@ size_t PbTestClass::MakeAddTest()
     // input: 1 add_new <params>
     for (auto query : addQueries)
     {
-        instance->currId = "";
-        instance->currQuery = "";
+        instance.currId = "";
+        instance.currQuery = "";
 
-        instance->MakeString();
-        errors += (query != instance->currQuery);
+        instance.MakeString();
+        errors += (query != instance.currQuery);
     }
 
     return errors;
@@ -568,20 +556,20 @@ size_t PbTestClass::MakeRemoveTest()
     //input: 1 choose <param> 4
     for (auto query : removeQueries)
     {
-        instance->currQuery = "";
-        instance->currId = "";
-        instance->MakeString();
-        errors += (query != instance->currQuery);
+        instance.currQuery = "";
+        instance.currId = "";
+        instance.MakeString();
+        errors += (query != instance.currQuery);
     }
 
     // parameters received by direct user input
     // input: 1 delete <param>
     for (auto query : removeQueries)
     {
-        instance->currQuery = "";
-        instance->currId = "";
-        instance->MakeString();
-        errors += (query != instance->currQuery);
+        instance.currQuery = "";
+        instance.currId = "";
+        instance.MakeString();
+        errors += (query != instance.currQuery);
     }
 
     return errors;
@@ -594,10 +582,10 @@ size_t PbTestClass::MakeFindJoinedTest()
     // params fed to instance by the "choose" operation
     for (auto test : FindJoinedQueries)
     {
-        instance->currQuery = "";
-        instance->currId = "";
-        instance->MakeString();
-        errors += (test.at(2) != instance->currQuery);
+        instance.currQuery = "";
+        instance.currId = "";
+        instance.MakeString();
+        errors += (test.at(2) != instance.currQuery);
     }
 
     return errors;
@@ -609,10 +597,10 @@ size_t PbTestClass::MakeFindCurrIdTest()
 
     for (auto query : FindCurrIdQueries)
     {
-        instance->currQuery = "";
-        instance->currId = "";
-        instance->MakeString();
-        errors += (query != instance->currQuery);
+        instance.currQuery = "";
+        instance.currId = "";
+        instance.MakeString();
+        errors += (query != instance.currQuery);
     }
 
     return errors;
@@ -623,22 +611,22 @@ size_t PbTestClass::ExitTest()
 {
     size_t errors = 0;
 
-    instance->Exit();
-    errors += (false != instance->isRunning);
-    errors += ("exit" != instance->currQuery);
+    instance.Exit();
+    errors += (false != instance.isRunning);
+    errors += ("exit" != instance.currQuery);
     
     return errors;
 }
 
 size_t PbTestClass::ClearSearchTest()
 {
-    instance->currId = "test";
-    instance->currQuery = "test";
+    instance.currId = "test";
+    instance.currQuery = "test";
 
     size_t errors = 0;
-    errors += ("" != instance->ClearSearch());
-    errors += ("" != instance->currId);
-    errors += ("" != instance->currQuery);
+    errors += ("" != instance.ClearSearch());
+    errors += ("" != instance.currId);
+    errors += ("" != instance.currQuery);
 
     return errors;
 }
@@ -654,7 +642,7 @@ size_t PbTestClass::FindByTest()
     size_t errors = 0;
     for (auto query : findByQueries)
     {
-        errors += (query != instance->FindBy());
+        errors += (query != instance.FindBy());
     }
 
     ResetToCio();
@@ -664,8 +652,8 @@ size_t PbTestClass::FindByTest()
 
 size_t PbTestClass::GetAllTest()
 {
-    instance->SetDataTable("pets");
-    return ("SELECT * FROM pets ORDER BY pet_id ASC" != instance->GetAll());
+    instance.SetDataTable("pets");
+    return ("SELECT * FROM pets ORDER BY pet_id ASC" != instance.GetAll());
 }
 
 // Secondary queries
@@ -679,20 +667,20 @@ size_t PbTestClass::FilterByTest()
     size_t errors = 0;
     for (auto query : filterByQueries)
     {
-        instance->currQuery = "";
+        instance.currQuery = "";
 
-        instance->currQuery = instance->FindBy();
-        errors += (query != instance->FilterBy());
+        instance.currQuery = instance.FindBy();
+        errors += (query != instance.FilterBy());
     }
 
     for (auto query : filterConcatQueries)
     {
-        instance->currQuery = "";
+        instance.currQuery = "";
 
-        instance->currQuery = instance->FindBy();
-        instance->FilterBy();
-        instance->FilterBy();
-        errors += (query != instance->FilterBy());
+        instance.currQuery = instance.FindBy();
+        instance.FilterBy();
+        instance.FilterBy();
+        errors += (query != instance.FilterBy());
     }
 
     ResetToCio();
@@ -710,9 +698,9 @@ size_t PbTestClass::OrderByTest()
     size_t errors = 0;
     for (auto query : orderByQueries)
     {
-        instance->currQuery = instance->FindBy();
-        errors += (query != instance->OrderBy());
-        instance->currQuery = "";
+        instance.currQuery = instance.FindBy();
+        errors += (query != instance.OrderBy());
+        instance.currQuery = "";
     }
 
     ResetToCio();
@@ -726,15 +714,15 @@ size_t PbTestClass::ChooseEntryTest()
 	ofstream out(CHOOSE_OUT);
     RedirectToFile(&in, &out);
 
-    instance->SetDataTable("pets");
-    instance->currQuery = "";
+    instance.SetDataTable("pets");
+    instance.currQuery = "";
 
     // check return values
     size_t errors = 0;
     for (auto query : chooseQueries)
     {
-        instance->SetDataTable("pets");
-        errors += (query != instance->ChooseEntry());
+        instance.SetDataTable("pets");
+        errors += (query != instance.ChooseEntry());
     }
 
     ResetToCio();
@@ -753,19 +741,19 @@ size_t PbTestClass::FindJoinedTest()
     // currId fed to instance by the "choose" operation
     for (auto test : FindJoinedQueries)
     {
-        instance->SetDataTable(test.at(0));
-        instance->currQuery = "choose";
-        instance->currId = test.at(1);
-        errors += (test.at(2) != instance->FindJoined());
+        instance.SetDataTable(test.at(0));
+        instance.currQuery = "choose";
+        instance.currId = test.at(1);
+        errors += (test.at(2) != instance.FindJoined());
     }
 
     // currId received by direct user input
     for (auto test : FindJoinedQueries)
     {
-        instance->SetDataTable(test.at(0));
-        instance->currQuery = "";
-        instance->currId = "";
-        errors += (test.at(2) != instance->FindJoined());
+        instance.SetDataTable(test.at(0));
+        instance.currQuery = "";
+        instance.currId = "";
+        errors += (test.at(2) != instance.FindJoined());
     }
 
     ResetToCio();
@@ -784,8 +772,8 @@ size_t PbTestClass::UpdateFieldTest()
     size_t errors = 0;
     for (auto query : updateQueries)
     {
-        instance->SetDataTable("pets");
-        errors += (query != instance->UpdateField());
+        instance.SetDataTable("pets");
+        errors += (query != instance.UpdateField());
     }
 
     ResetToCio();
@@ -803,8 +791,8 @@ size_t PbTestClass::AddEntryTest()
     size_t errors = 0;
     for (auto query : addQueries)
     {
-        instance->SetDataTable("pets");
-        errors += (query != instance->AddEntry());
+        instance.SetDataTable("pets");
+        errors += (query != instance.AddEntry());
     }
 
     ResetToCio();
@@ -823,18 +811,18 @@ size_t PbTestClass::RemoveEntryTest()
     // parameters fed to instance by the "choose" operation
     for (auto test : removeChoiceQueries)
     {
-        instance->SetDataTable(test.at(0));
-        instance->currQuery = "choose";
-        instance->currId = test.at(1);
-        errors += (test.at(2) != instance->RemoveEntry());
+        instance.SetDataTable(test.at(0));
+        instance.currQuery = "choose";
+        instance.currId = test.at(1);
+        errors += (test.at(2) != instance.RemoveEntry());
     }
 
     // parameters received by direct user input
     for (auto query : removeQueries)
     {
-        instance->currQuery = "";
-        instance->currId = "";
-        errors += (query != instance->RemoveEntry());
+        instance.currQuery = "";
+        instance.currId = "";
+        errors += (query != instance.RemoveEntry());
     }
 
     ResetToCio();
@@ -845,34 +833,34 @@ size_t PbTestClass::RemoveEntryTest()
 // Helper operations
 size_t PbTestClass::FindByCurrIdTest()
 {
-    instance->currId = "2";
-    return ("SELECT * FROM pets WHERE pet_id=2" != instance->FindByCurrId());
+    instance.currId = "2";
+    return ("SELECT * FROM pets WHERE pet_id=2" != instance.FindByCurrId());
 }
 
 size_t PbTestClass::FindByMaxIdTest()
 {
     return ("SELECT * FROM pets WHERE pet_id = (SELECT MAX(pet_id) FROM pets)" !=
-            instance->FindByMaxId());
+            instance.FindByMaxId());
 }
 
 size_t PbTestClass::SelectDataTest()
 {
-    instance->currTable = "pets";
-    return ("SELECT * FROM pets" != instance->SelectData());
+    instance.currTable = "pets";
+    return ("SELECT * FROM pets" != instance.SelectData());
 }
 
 size_t PbTestClass::SelectDataWhereTest()
 {
-    instance->currTable = "pets";
+    instance.currTable = "pets";
     return ("SELECT * FROM pets WHERE " !=
-            instance->SelectDataWhere());
+            instance.SelectDataWhere());
 }
 
 size_t PbTestClass::SelectDataAscTest()
 {
-    instance->currTable = "pets";
+    instance.currTable = "pets";
     return ("SELECT * FROM pets ORDER BY pet_id ASC" !=
-            instance->SelectDataAsc());
+            instance.SelectDataAsc());
 }
 
 size_t PbTestClass::GetRuleTest()
@@ -886,7 +874,7 @@ size_t PbTestClass::GetRuleTest()
         val2 = test.at(2);
         rule = test.at(3);
 
-        errors += (rule != instance->GetRule(col, val, val2));
+        errors += (rule != instance.GetRule(col, val, val2));
     }
     
     return 0;

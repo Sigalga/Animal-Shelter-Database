@@ -35,9 +35,9 @@ static const vector<PetBook::Key> OPER_NAMES =
     "exit",         // 0  initial  secondary
     "show_all",     // 1  initial
     "find",         // 2  initial
-    "update",       // 3  initial  secondary
+    "update",       // 3  initial  secondary    choice
     "add_new",      // 4  initial  secondary
-    "delete",       // 5  initial  secondary
+    "delete",       // 5  initial  secondary    choice
     "filter",       // 6           secondary
     "order",        // 7           secondary
     "clear",        // 8  initial  secondary
@@ -84,18 +84,8 @@ static const vector<PetBook::Key> CHOICE_OPER_NAMES =
 
 ///////////////////////////////////////////////////////////////////
 
-// PetBook::PetBook(Connection* con,
-//         shared_ptr<StmtStringGenerator> strGenSmart)
-//     :   con(con), stringGen(strGenSmart)
-// {
-// 	con->setSchema(petBookDB);
-//     SetCurrPK();
-//     InitStringGen();
-// }
-
-PetBook::PetBook(shared_ptr<Connection> con,
-        shared_ptr<StmtStringGenerator> strGenSmart)
-    :   con(con), stringGen(strGenSmart)
+PetBook::PetBook(std::shared_ptr<sql::Connection> con)
+    :   con(con)
 {
 	con->setSchema(petBookDB);
     SetCurrPK();
@@ -122,7 +112,7 @@ void PetBook::InitStringGen()
 
     for (size_t i = 0; i < OPER_NAMES.size(); i++)
     {
-        stringGen->AddStringFunc(OPER_NAMES[i], stringFuncs[i]);
+        stringGen.AddStringFunc(OPER_NAMES[i], stringFuncs[i]);
     }
 }
 
@@ -196,7 +186,7 @@ void PetBook::MakeString()
     cin >> key;
 
     // generates a string into currQuery
-    stringGen->GenerateString(key);
+    stringGen.GenerateString(key);
 }
 
 // Result Displayers
@@ -281,8 +271,9 @@ void PetBook::DisplayOperMenu()
     cout << "Select an operation by typing it.\n"
     << "Available operations in " << currTable << " are:" << endl;
 
-    if ("" == currId ||         // entirely new search
-        "exit" == currQuery)    // new primary oper in same datatable
+    // if ("" == currId ||         // entirely new search
+    //     "exit" == currQuery)    // new primary oper in same datatable
+    if ("" == currId)         // new search
     {
         for (auto name : INIT_OPER_NAMES)
         {
@@ -335,8 +326,9 @@ ResultSet* PetBook::GetFields()
 const string& PetBook::Exit()
 {
     isRunning = false;
-    currQuery = "exit";
-    return currQuery;
+    currPK = "";
+    stmtString = "";
+    return ClearSearch();
 }
 
 const string& PetBook::ClearSearch()
@@ -388,7 +380,7 @@ const string& PetBook::FilterBy()
     GetSearchVals(val, val2);
 
     // add rule to the current query
-    const string rule(GetRule(col, val, ""));
+    const string rule(GetRule(col, val, val2));
     const string getAll(SelectDataAsc());
     if (getAll == currQuery)
     {
@@ -399,7 +391,7 @@ const string& PetBook::FilterBy()
     {
         currQuery += (" AND " + rule);
     }
-
+    cout << currQuery << endl;
     return currQuery;
 }
 
@@ -453,7 +445,7 @@ const string& PetBook::ChooseEntry()
         // receive choice and execute
         size_t key = 0;
         cin >> key;
-        stringGen->GenerateString(CHOICE_OPER_NAMES[key - 1]);
+        stringGen.GenerateString(CHOICE_OPER_NAMES[key - 1]);
     }
 
     return currQuery;
@@ -653,7 +645,7 @@ const string& PetBook::GetRule(const string& col, const string& val, const strin
         if ("" == val2)
         {
             // find by number
-            stmtString = (col + "=" + val);
+            stmtString = (col + (isNull(val) ? " IS NULL" : "=" + val));
         }
         else
         {

@@ -15,8 +15,7 @@ static const string USER_DEF("root");
 AnimalShelterSystem::AnimalShelterSystem()
     :   driver(sql::mysql::get_mysql_driver_instance()),
         con(SetConnection()),
-        pbStringGen(new StmtStringGenerator),
-        petBook(con, pbStringGen)
+        petBook(con)
 {
     Start();
 }

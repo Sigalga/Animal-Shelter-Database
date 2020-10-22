@@ -21,12 +21,9 @@ static const string PASS = "root";
 int main()
 {
 	mysql::MySQL_Driver* driver = mysql::get_mysql_driver_instance();
-	shared_ptr<StmtStringGenerator> sp_StmtStrGen(new StmtStringGenerator);
 	shared_ptr<Connection> sp_con(driver->connect(URL, USER, PASS));
 
-	PetBook petBook(sp_con, sp_StmtStrGen);
-
-	PbTestClass test(&petBook);
+	PbTestClass test(sp_con);
 	test.StringFuncsTest();
     test.PrivateMethodsTest();
 	test.PublicMethodsTest();

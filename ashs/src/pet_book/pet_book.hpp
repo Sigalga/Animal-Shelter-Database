@@ -24,9 +24,8 @@ public:
     using Key =         StmtStringGenerator::Key;
     using StringFunc =  StmtStringGenerator::StringFunc;
 
-    PetBook(std::shared_ptr<sql::Connection> con,
-            std::shared_ptr<StmtStringGenerator> strGenSmart);
-    
+    PetBook(std::shared_ptr<sql::Connection> con);
+
     ~PetBook() { delete fields; }
 
     PetBook(const PetBook&) = delete;
@@ -45,7 +44,8 @@ public:
 private:
     // animal shelter system resources
     std::shared_ptr<sql::Connection> con;   // ashs connection to an SQL server database
-    std::shared_ptr<StmtStringGenerator> stringGen; // ashs statement string generator
+    // std::shared_ptr<StmtStringGenerator> stringGen; // statement string generator
+    StmtStringGenerator stringGen; // statement string generator
     
     // petbook resources
     std::string petBookDB = PET_BOOK_DB;    // name of the SQL database
@@ -127,6 +127,8 @@ private:
     // either in an ascending or descending order
     const std::string& OrderBy();
     //
+    // Receives a primary key of an entry in the table
+    // to perform further operations on it
     const std::string& ChooseEntry();
     //
     // Receives an adopter id to show all of its pets,

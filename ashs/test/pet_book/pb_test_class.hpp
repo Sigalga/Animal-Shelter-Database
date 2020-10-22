@@ -9,14 +9,14 @@ namespace ashs
 class PbTestClass
 {
 public:
-    PbTestClass(PetBook* petBook) : instance(petBook) {}
+    PbTestClass(std::shared_ptr<sql::Connection> con) : instance(con) {}
 
     void StringFuncsTest();
     void PrivateMethodsTest();
     void PublicMethodsTest();
 
 private:
-    PetBook* instance;
+    PetBook instance;
 
     // Public Methods Tests //////////
     void StartTest();
