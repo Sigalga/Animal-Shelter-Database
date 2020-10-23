@@ -391,7 +391,7 @@ const string& PetBook::FilterBy()
     {
         currQuery += (" AND " + rule);
     }
-    cout << currQuery << endl;
+    
     return currQuery;
 }
 
@@ -557,7 +557,10 @@ const string& PetBook::AddEntry()
     // add columns to statement string
     currQuery = "INSERT INTO " + currTable + " (";
     fields->first();
-    fields->next();    // skip pk column
+    if ("pets" == currTable)
+    {
+        fields->next();    // skip pk column
+    }
     currQuery += fields->getString("COLUMN_NAME");
     while (fields->next())
     {
@@ -567,7 +570,10 @@ const string& PetBook::AddEntry()
 
     // add values from input to statement string
     fields->first();
-    fields->next();    // skip pk column
+    if ("pets" == currTable)
+    {
+        fields->next();    // skip pk column
+    }
     cout << fields->getString("COLUMN_NAME") << ": " << flush;
     string val("");
     cin >> val;
