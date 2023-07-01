@@ -1,4 +1,4 @@
-# animal-shelter-system
+# Animal Shelter Database
 
 This system is designed to run on Ubuntu 18.0.
 
